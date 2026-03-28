@@ -3,6 +3,7 @@ import { useState } from 'react';
 const CONDITION_TYPES = [
   { value: 'QUERY_PARAM', label: 'Query Param' },
   { value: 'BODY',        label: 'JSON Body' },
+  { value: 'HEADER',      label: 'Header' },
 ];
 
 const OPERATORS = [
@@ -29,7 +30,7 @@ function ConditionRow({ condition, index, onChange, onRemove }) {
       </select>
 
       <input
-        placeholder={condition.type === 'BODY' ? 'customer.id' : 'paramName'}
+        placeholder={condition.type === 'BODY' ? 'customer.id' : condition.type === 'HEADER' ? 'Authorization' : 'paramName'}
         value={condition.field}
         onChange={(e) => update('field', e.target.value)}
       />
@@ -88,6 +89,41 @@ export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, 
     onUpdate({ ...scenario, conditions: [...scenario.conditions, { ...EMPTY_CONDITION }] });
   }
 
+  function parseHeaders(val) {
+    if (!val) return [];
+    try {
+      if (typeof val === 'string') {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+        return Object.entries(parsed).map(([key, value]) => ({ key, value }));
+      }
+      if (Array.isArray(val)) return val;
+      return Object.entries(val).map(([key, value]) => ({ key, value }));
+    } catch { return []; }
+  }
+
+  function serializeHeaders(rows) {
+    if (rows.length === 0) return '';
+    return JSON.stringify(rows);
+  }
+
+  function handleHeaderChange(scenario, idx, field, val) {
+    const rows = parseHeaders(scenario.responseHeaders);
+    rows[idx] = { ...rows[idx], [field]: val };
+    onUpdate({ ...scenario, responseHeaders: serializeHeaders(rows) });
+  }
+
+  function handleAddHeader(scenario) {
+    const rows = parseHeaders(scenario.responseHeaders);
+    rows.push({ key: '', value: '' });
+    onUpdate({ ...scenario, responseHeaders: serializeHeaders(rows) });
+  }
+
+  function handleRemoveHeader(scenario, idx) {
+    const rows = parseHeaders(scenario.responseHeaders).filter((_, i) => i !== idx);
+    onUpdate({ ...scenario, responseHeaders: serializeHeaders(rows) });
+  }
+
   function applyTemplate(tmpl) {
     onAdd({
       name: tmpl.label,
@@ -120,7 +156,7 @@ export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, 
           <button
             type="button"
             className="btn btn-primary btn-sm"
-            onClick={() => onAdd({ name: '', description: '', priority: 0, statusCode: 200, responseBody: '', delayMs: 0, conditions: [] })}
+            onClick={() => onAdd({ name: '', description: '', priority: 0, statusCode: 200, responseBody: '', responseHeaders: '', delayMs: 0, conditions: [] })}
           >
             + Add Scenario
           </button>
@@ -191,6 +227,47 @@ export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, 
                     onChange={(e) => handleFieldChange(sc, 'responseBody', e.target.value)}
                     placeholder={'{\n  "error": "..."\n}'}
                   />
+                </div>
+
+                {/* Response Headers */}
+                <div className="form-group full-width">
+                  <div className="conditions-header">
+                    <label>Response Headers</label>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleAddHeader(sc)}>
+                      + Header
+                    </button>
+                  </div>
+                  {parseHeaders(sc.responseHeaders).length === 0 && (
+                    <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                      No custom response headers.
+                    </p>
+                  )}
+                  {parseHeaders(sc.responseHeaders).map((h, hi) => (
+                    <div className="header-input-row" key={hi}>
+                      <input
+                        placeholder="Header name"
+                        value={h.key}
+                        onChange={(e) => handleHeaderChange(sc, hi, 'key', e.target.value)}
+                      />
+                      <input
+                        placeholder="Value"
+                        value={h.value}
+                        disabled={h.value === '{{$guid}}'}
+                        onChange={(e) => handleHeaderChange(sc, hi, 'value', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${h.value === '{{$guid}}' ? 'btn-guid-active' : 'btn-ghost'}`}
+                        title="Auto-generate GUID on each request"
+                        onClick={() => {
+                          const rows = parseHeaders(sc.responseHeaders);
+                          rows[hi] = { ...rows[hi], value: rows[hi].value === '{{$guid}}' ? '' : '{{$guid}}' };
+                          onUpdate({ ...sc, responseHeaders: serializeHeaders(rows) });
+                        }}
+                      >GUID</button>
+                      <button type="button" className="btn btn-danger btn-sm" onClick={() => handleRemoveHeader(sc, hi)}>×</button>
+                    </div>
+                  ))}
                 </div>
               </div>
 

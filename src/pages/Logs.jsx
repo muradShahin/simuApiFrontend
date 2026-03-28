@@ -136,17 +136,17 @@ export default function Logs() {
                     </tr>
 
                     {expanded === log.id && (
-                      <tr key={`${log.id}-expanded`} style={{ background: '#f8fafc' }}>
+                      <tr key={`${log.id}-expanded`} style={{ background: 'var(--bg-3)' }}>
                         <td colSpan={6} style={{ padding: '16px' }}>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div>
-                              <strong style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              <strong style={{ fontSize: 12, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Request Body
                               </strong>
                               <div className="log-body">{tryPretty(log.requestBody)}</div>
                             </div>
                             <div>
-                              <strong style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              <strong style={{ fontSize: 12, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Response Body
                               </strong>
                               <div className="log-body">{tryPretty(log.responseBody)}</div>

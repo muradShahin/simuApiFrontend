@@ -27,12 +27,16 @@ export default function Login() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <div className="auth-logo">
+          <span className="auth-logo-text">Simu<span>API</span></span>
+        </div>
         <h1 className="auth-title">Sign In</h1>
         <p className="auth-subtitle">Welcome back to SimuAPI</p>
+        <p className="auth-tagline">Simulate real APIs. Test faster.</p>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -45,7 +49,7 @@ export default function Login() {
               autoFocus
             />
           </div>
-          <div className="form-group" style={{ marginTop: 16 }}>
+          <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -57,7 +61,7 @@ export default function Login() {
               minLength={6}
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 20 }} disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
@@ -65,7 +69,7 @@ export default function Login() {
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Create one</Link>
         </p>
-        <p className="auth-footer text-muted" style={{ marginTop: 8 }}>
+        <p className="auth-guest-link">
           Or continue as <Link to="/dashboard">anonymous</Link> (limited features)
         </p>
       </div>

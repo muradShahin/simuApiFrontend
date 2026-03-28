@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { createMock, getMockById, updateMock } from '../api/mocks';
 import { getScenarios, createScenario, updateScenario, deleteScenario } from '../api/scenarios';
 import { getCollections } from '../api/collections';
+import { getAuthConfig, saveAuthConfig } from '../api/authConfig';
 import { useAuth } from '../context/AuthContext';
 import ScenarioBuilder from '../components/ScenarioBuilder';
 
@@ -15,6 +16,7 @@ const EMPTY_FORM = {
   statusCode: 200,
   delayMs: 0,
   responseBody: '',
+  responseHeaders: '',
   simulateTimeout: false,
   collectionId: '',
 };
@@ -33,7 +35,43 @@ export default function MockForm() {
   const [error, setError]           = useState(null);
   const [loaded, setLoaded]         = useState(false);
 
+  const [authConfig, setAuthConfig] = useState({
+    type: 'NONE',
+    username: '',
+    password: '',
+    secretKey: '',
+    issuer: '',
+    expirationSeconds: 3600,
+    tokenEndpointEnabled: true,
+  });
+
   let _tempCounter = 0;
+
+  function parseResponseHeaders(val) {
+    if (!val) return [];
+    try {
+      if (typeof val === 'string') {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed;
+        return Object.entries(parsed).map(([key, value]) => ({ key, value }));
+      }
+      if (Array.isArray(val)) return val;
+      return Object.entries(val).map(([key, value]) => ({ key, value }));
+    } catch { return []; }
+  }
+
+  function serializeResponseHeaders(rows) {
+    if (rows.length === 0) return '';
+    return JSON.stringify(rows);
+  }
+
+  function headersToObject(val) {
+    const rows = parseResponseHeaders(val);
+    if (rows.length === 0) return null;
+    const obj = {};
+    rows.forEach(({ key, value }) => { if (key && key.trim()) obj[key.trim()] = value; });
+    return Object.keys(obj).length > 0 ? JSON.stringify(obj) : null;
+  }
 
   // Load collections for the picker
   useEffect(() => {
@@ -44,11 +82,15 @@ export default function MockForm() {
     }
   }, [isAuthenticated]);
 
-  // Load existing mock + scenarios when editing (once only)
+  // Load existing mock + scenarios + auth config when editing (once only)
   useEffect(() => {
     if (!isEdit || loaded) return;
-    Promise.all([getMockById(id), isAuthenticated ? getScenarios(id).catch(() => ({ data: [] })) : Promise.resolve({ data: [] })])
-      .then(([mockRes, scenRes]) => {
+    Promise.all([
+      getMockById(id),
+      isAuthenticated ? getScenarios(id).catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
+      isAuthenticated ? getAuthConfig(id).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
+    ])
+      .then(([mockRes, scenRes, authRes]) => {
         const m = mockRes.data;
         setForm({
           name:            m.name,
@@ -57,6 +99,7 @@ export default function MockForm() {
           statusCode:      m.statusCode,
           delayMs:         m.delayMs,
           responseBody:    m.responseBody ?? '',
+          responseHeaders: m.responseHeaders ?? '',
           simulateTimeout: m.simulateTimeout,
           collectionId:    m.collectionId || '',
         });
@@ -67,6 +110,7 @@ export default function MockForm() {
           priority: s.priority,
           statusCode: s.statusCode,
           responseBody: s.responseBody || '',
+          responseHeaders: s.responseHeaders || '',
           delayMs: s.delayMs,
           conditions: (s.conditions || []).map((c) => ({
             type: c.type,
@@ -76,6 +120,18 @@ export default function MockForm() {
           })),
           _dirty: false,
         })));
+        // Load auth config
+        if (authRes.data && authRes.data.type) {
+          setAuthConfig({
+            type: authRes.data.type || 'NONE',
+            username: authRes.data.username || '',
+            password: authRes.data.password || '',
+            secretKey: authRes.data.secretKey || '',
+            issuer: authRes.data.issuer || '',
+            expirationSeconds: authRes.data.expirationSeconds || 3600,
+            tokenEndpointEnabled: authRes.data.tokenEndpointEnabled ?? true,
+          });
+        }
         setLoaded(true);
       })
       .catch((err) => setError(err.message))
@@ -100,6 +156,7 @@ export default function MockForm() {
     const payload = {
       ...form,
       responseBody: form.responseBody.trim() || null,
+      responseHeaders: headersToObject(form.responseHeaders),
       collectionId: form.collectionId || null,
     };
 
@@ -121,6 +178,7 @@ export default function MockForm() {
             priority: sc.priority,
             statusCode: sc.statusCode,
             responseBody: sc.responseBody,
+            responseHeaders: headersToObject(sc.responseHeaders),
             delayMs: sc.delayMs,
             conditions: sc.conditions,
           };
@@ -130,6 +188,11 @@ export default function MockForm() {
             await updateScenario(mockId, sc.id, body);
           }
         }
+      }
+
+      // Persist auth config
+      if (isAuthenticated && mockId) {
+        await saveAuthConfig(mockId, authConfig);
       }
 
       navigate('/dashboard');
@@ -304,6 +367,215 @@ export default function MockForm() {
                 placeholder={'{\n  "status": "ok",\n  "data": {}\n}'}
               />
             </div>
+
+            {/* Response Headers */}
+            <div className="form-group full-width">
+              <div className="conditions-header">
+                <label>Response Headers</label>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    const rows = parseResponseHeaders(form.responseHeaders);
+                    rows.push({ key: '', value: '' });
+                    setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                  }}
+                >
+                  + Header
+                </button>
+              </div>
+              {parseResponseHeaders(form.responseHeaders).length === 0 && (
+                <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                  No custom response headers. Click "+ Header" to add.
+                </p>
+              )}
+              {parseResponseHeaders(form.responseHeaders).map((h, hi) => (
+                <div className="header-input-row" key={hi}>
+                  <input
+                    placeholder="Header name (e.g. X-Request-Id)"
+                    value={h.key}
+                    onChange={(e) => {
+                      const rows = parseResponseHeaders(form.responseHeaders);
+                      rows[hi] = { ...rows[hi], key: e.target.value };
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  />
+                  <input
+                    placeholder="Value"
+                    value={h.value}
+                    disabled={h.value === '{{$guid}}'}
+                    onChange={(e) => {
+                      const rows = parseResponseHeaders(form.responseHeaders);
+                      rows[hi] = { ...rows[hi], value: e.target.value };
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${h.value === '{{$guid}}' ? 'btn-guid-active' : 'btn-ghost'}`}
+                    title="Auto-generate GUID on each request"
+                    onClick={() => {
+                      const rows = parseResponseHeaders(form.responseHeaders);
+                      rows[hi] = { ...rows[hi], value: rows[hi].value === '{{$guid}}' ? '' : '{{$guid}}' };
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  >GUID</button>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => {
+                      const rows = parseResponseHeaders(form.responseHeaders).filter((_, i) => i !== hi);
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  >×</button>
+                </div>
+              ))}
+            </div>
+
+            {/* Authentication Simulation */}
+            {isAuthenticated && (
+              <div className="form-group full-width">
+                <div className="conditions-header">
+                  <label>Authentication Simulation</label>
+                </div>
+
+                <div className="auth-config-section">
+                  <div className="form-group">
+                    <label htmlFor="authType">Auth Type</label>
+                    <select
+                      id="authType"
+                      value={authConfig.type}
+                      onChange={(e) => setAuthConfig((prev) => ({ ...prev, type: e.target.value }))}
+                    >
+                      <option value="NONE">None</option>
+                      <option value="BASIC">Basic Auth</option>
+                      <option value="JWT">JWT Bearer</option>
+                      <option value="OAUTH2">OAuth2</option>
+                    </select>
+                  </div>
+
+                  {/* BASIC fields */}
+                  {authConfig.type === 'BASIC' && (
+                    <>
+                      <div className="auth-fields-row">
+                        <div className="form-group">
+                          <label>Username</label>
+                          <input
+                            value={authConfig.username}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, username: e.target.value }))}
+                            placeholder="mock-user"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Password</label>
+                          <input
+                            type="password"
+                            value={authConfig.password}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, password: e.target.value }))}
+                            placeholder="mock-password"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                        Requests must include <code>Authorization: Basic base64(username:password)</code>
+                      </p>
+                    </>
+                  )}
+
+                  {/* JWT fields */}
+                  {authConfig.type === 'JWT' && (
+                    <>
+                      <div className="auth-fields-row">
+                        <div className="form-group">
+                          <label>Secret Key *</label>
+                          <input
+                            value={authConfig.secretKey}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, secretKey: e.target.value }))}
+                            placeholder="my-secret-key-at-least-32-chars"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Issuer (optional)</label>
+                          <input
+                            value={authConfig.issuer}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, issuer: e.target.value }))}
+                            placeholder="simuapi"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Expiration (sec)</label>
+                          <input
+                            type="number"
+                            min={60}
+                            value={authConfig.expirationSeconds}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, expirationSeconds: Number(e.target.value) }))}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                        Requests must include a valid <code>Authorization: Bearer &lt;jwt-token&gt;</code> signed with this secret.
+                      </p>
+                    </>
+                  )}
+
+                  {/* OAUTH2 fields */}
+                  {authConfig.type === 'OAUTH2' && (
+                    <>
+                      <div className="auth-fields-row">
+                        <div className="form-group">
+                          <label>Secret Key *</label>
+                          <input
+                            value={authConfig.secretKey}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, secretKey: e.target.value }))}
+                            placeholder="my-secret-key-at-least-32-chars"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Issuer (optional)</label>
+                          <input
+                            value={authConfig.issuer}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, issuer: e.target.value }))}
+                            placeholder="simuapi"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Expiration (sec)</label>
+                          <input
+                            type="number"
+                            min={60}
+                            value={authConfig.expirationSeconds}
+                            onChange={(e) => setAuthConfig((prev) => ({ ...prev, expirationSeconds: Number(e.target.value) }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="checkbox-row" style={{ marginTop: 8 }}>
+                        <input
+                          id="tokenEndpointEnabled"
+                          type="checkbox"
+                          checked={authConfig.tokenEndpointEnabled}
+                          onChange={(e) => setAuthConfig((prev) => ({ ...prev, tokenEndpointEnabled: e.target.checked }))}
+                        />
+                        <label htmlFor="tokenEndpointEnabled">Enable token endpoint</label>
+                      </div>
+                      {authConfig.tokenEndpointEnabled && isEdit && (
+                        <div className="oauth-info-box">
+                          <p className="oauth-info-title">OAuth2 Token Endpoint</p>
+                          <code className="oauth-endpoint-url">POST /mock/{id}/oauth/token</code>
+                          <p className="oauth-info-subtitle">Example curl:</p>
+                          <pre className="oauth-curl-example">{`curl -X POST "${window.location.origin}/mock/${id}/oauth/token" \\\n  -d "grant_type=client_credentials"`}</pre>
+                          <p className="oauth-info-subtitle">Example response:</p>
+                          <pre className="oauth-curl-example">{`{
+  "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+  "token_type": "Bearer",
+  "expires_in": ${authConfig.expirationSeconds}
+}`}</pre>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Scenarios (PRO) */}
             {isPro && isEdit && (

@@ -32,12 +32,16 @@ export default function Register() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <div className="auth-logo">
+          <span className="auth-logo-text">Simu<span>API</span></span>
+        </div>
         <h1 className="auth-title">Create Account</h1>
         <p className="auth-subtitle">Get started with SimuAPI for free</p>
+        <p className="auth-tagline">Simulate real APIs. Test faster.</p>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -50,7 +54,7 @@ export default function Register() {
               autoFocus
             />
           </div>
-          <div className="form-group" style={{ marginTop: 16 }}>
+          <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -62,7 +66,7 @@ export default function Register() {
               minLength={6}
             />
           </div>
-          <div className="form-group" style={{ marginTop: 16 }}>
+          <div className="form-group">
             <label htmlFor="confirm">Confirm Password</label>
             <input
               id="confirm"
@@ -74,7 +78,7 @@ export default function Register() {
               minLength={6}
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 20 }} disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Creating account…' : 'Create Account'}
           </button>
         </form>
@@ -82,7 +86,7 @@ export default function Register() {
         <p className="auth-footer">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
-        <p className="auth-footer text-muted" style={{ marginTop: 8 }}>
+        <p className="auth-guest-link">
           Or continue as <Link to="/dashboard">anonymous</Link> (limited features)
         </p>
       </div>

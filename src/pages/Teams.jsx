@@ -233,12 +233,12 @@ export default function Teams() {
               {expandedTeam === team.id && (
                 <div className="team-card-body">
                   {/* Members */}
-                  <h4 style={{ fontSize: 13, marginBottom: 8, color: '#374151' }}>Members</h4>
+                  <h4 style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-2)' }}>Members</h4>
                   <div className="team-members-list">
                     {team.members?.map((m) => (
                       <div key={m.id} className="team-member-row">
                         <span>{m.email}</span>
-                        <span className="badge" style={{ marginLeft: 8, background: m.role === 'OWNER' ? '#ede9fe' : '#f1f5f9', color: m.role === 'OWNER' ? '#6d28d9' : '#64748b', fontSize: 10 }}>
+                        <span className="badge" style={{ marginLeft: 8, background: m.role === 'OWNER' ? 'var(--accent-dim)' : 'var(--bg-3)', color: m.role === 'OWNER' ? 'var(--accent)' : 'var(--text-3)', fontSize: 10 }}>
                           {m.role}
                         </span>
                         {m.role !== 'OWNER' && (
@@ -255,8 +255,8 @@ export default function Teams() {
                   </div>
 
                   {/* Invite */}
-                  <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
-                    <h4 style={{ fontSize: 13, marginBottom: 8, color: '#374151' }}>Invite User</h4>
+                  <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                    <h4 style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-2)' }}>Invite User</h4>
                     <form onSubmit={(e) => handleInvite(e, team.id)} style={{ display: 'flex', gap: 8 }}>
                       <input
                         type="email"
@@ -264,7 +264,7 @@ export default function Teams() {
                         value={inviteEmail}
                         onChange={(e) => setInviteEmail(e.target.value)}
                         required
-                        style={{ flex: 1, padding: '6px 10px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 13 }}
+                        style={{ flex: 1 }}
                       />
                       <button type="submit" className="btn btn-primary btn-sm" disabled={inviting}>
                         {inviting ? 'Sending…' : 'Send Invite'}
@@ -275,7 +275,7 @@ export default function Teams() {
                   {/* Pending invitations */}
                   {teamInvitations[team.id]?.length > 0 && (
                     <div style={{ marginTop: 12 }}>
-                      <h4 style={{ fontSize: 13, marginBottom: 8, color: '#374151' }}>Invitations</h4>
+                      <h4 style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-2)' }}>Invitations</h4>
                       {teamInvitations[team.id].map((inv) => (
                         <div key={inv.id} className="team-member-row">
                           <span>{inv.invitedEmail}</span>
@@ -283,8 +283,8 @@ export default function Teams() {
                             className="badge"
                             style={{
                               marginLeft: 8,
-                              background: inv.status === 'PENDING' ? '#fef9c3' : inv.status === 'ACCEPTED' ? '#dcfce7' : '#fee2e2',
-                              color: inv.status === 'PENDING' ? '#a16207' : inv.status === 'ACCEPTED' ? '#15803d' : '#b91c1c',
+                              background: inv.status === 'PENDING' ? 'var(--yellow-dim)' : inv.status === 'ACCEPTED' ? 'var(--green-dim)' : 'var(--red-dim)',
+                              color: inv.status === 'PENDING' ? 'var(--yellow)' : inv.status === 'ACCEPTED' ? 'var(--green)' : 'var(--red)',
                               fontSize: 10,
                             }}
                           >

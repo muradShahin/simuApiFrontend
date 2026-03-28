@@ -1,12 +1,20 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createCheckoutSession } from '../api/billing';
-import { useState } from 'react';
+import { getMyInvitations } from '../api/teams';
+import { useState, useEffect } from 'react';
 
 export default function Navbar() {
   const { isAuthenticated, user, isPro, isPastDue, isExpired, logout } = useAuth();
   const navigate = useNavigate();
   const [upgrading, setUpgrading] = useState(false);
+  const [inviteCount, setInviteCount] = useState(0);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getMyInvitations().then(res => setInviteCount(res.data?.length || 0)).catch(() => {});
+    }
+  }, [isAuthenticated]);
 
   function handleLogout() {
     logout();
@@ -59,6 +67,14 @@ export default function Navbar() {
                 {upgrading ? '…' : isPastDue ? 'Fix Payment' : isExpired ? 'Renew PRO' : 'Upgrade to PRO'}
               </button>
             )}
+            <button
+              className="navbar-notifications"
+              title={inviteCount > 0 ? `${inviteCount} pending invitation(s)` : 'No notifications'}
+              onClick={() => navigate('/dashboard')}
+            >
+              🔔
+              {inviteCount > 0 && <span className="navbar-notif-dot" />}
+            </button>
             <span className="navbar-user">
               {user.email}
               <span className={`plan-badge plan-${user.plan?.toLowerCase()}`}>{user.plan}</span>

@@ -261,6 +261,29 @@ export default function Dashboard() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* Dashboard Stats */}
+      {!loading && (
+        <div className="dashboard-stats">
+          <div className="stat-card">
+            <span className="stat-card-label">Total Mocks</span>
+            <span className="stat-card-value">{mocks.length}</span>
+            <span className="stat-card-hint">{maxMocks === Infinity ? 'Unlimited' : `${mocks.length}/${maxMocks} used`}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-card-label">Collections</span>
+            <span className="stat-card-value">{collections.length}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-card-label">Teams</span>
+            <span className="stat-card-value">{teams.length}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-card-label">Pending Invites</span>
+            <span className="stat-card-value">{invitations.length}</span>
+          </div>
+        </div>
+      )}
+
       {/* Pending team invitations */}
       {invitations.length > 0 && (
         <div className="invitation-banner">
@@ -323,6 +346,13 @@ export default function Dashboard() {
                   <td>{mock.simulateTimeout ? '⚡ Yes' : '—'}</td>
                   <td>
                     <div className="table-actions">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => navigate(`/mocks/${mock.id}`)}
+                        title="View mock details"
+                      >
+                        View
+                      </button>
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => copyCurl(mock)}
