@@ -2,9 +2,21 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllMocks, deleteMock } from '../api/mocks';
 import { createCheckoutSession, verifyCheckoutSession } from '../api/billing';
+import {
+  getCollections,
+  createCollection,
+  updateCollection,
+  deleteCollection as deleteCollectionApi,
+  moveMock as moveMockApi,
+} from '../api/collections';
+import { getMyTeams, getMyInvitations, acceptInvitation, declineInvitation } from '../api/teams';
 import { useAuth } from '../context/AuthContext';
 import MethodBadge from '../components/MethodBadge';
 import StatusBadge from '../components/StatusBadge';
+import CollectionSidebar from '../components/CollectionSidebar';
+import CollectionModal from '../components/CollectionModal';
+import MoveMockModal from '../components/MoveMockModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 
@@ -17,6 +29,15 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated, isPro, isPastDue, isExpired, user, refreshUser } = useAuth();
+
+  const [collections, setCollections]       = useState([]);
+  const [activeCollectionId, setActiveCollectionId] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [movingMock, setMovingMock] = useState(null);
+  const [invitations, setInvitations] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [confirmAction, setConfirmAction] = useState(null); // { title, message, variant, confirmText, onConfirm }
 
   const maxMocks = !isAuthenticated ? 3 : (isPro ? Infinity : 3);
   const upgradeStatus = searchParams.get('upgrade');
@@ -46,8 +67,16 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await getAllMocks();
-      setMocks(res.data);
+      const [mocksRes, colsRes, invRes, teamsRes] = await Promise.all([
+        getAllMocks(),
+        isAuthenticated ? getCollections().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
+        isAuthenticated ? getMyInvitations().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
+        isAuthenticated ? getMyTeams().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
+      ]);
+      setMocks(mocksRes.data);
+      setCollections(colsRes.data);
+      setInvitations(invRes.data);
+      setTeams(teamsRes.data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -55,14 +84,22 @@ export default function Dashboard() {
     }
   }
 
+  const displayedMocks = activeCollectionId
+    ? mocks.filter((m) => m.collectionId === activeCollectionId)
+    : mocks;
+
   async function handleDelete(mock) {
-    if (!window.confirm(`Delete mock "${mock.name}"?\nThis cannot be undone.`)) return;
-    try {
-      await deleteMock(mock.id);
-      setMocks((prev) => prev.filter((m) => m.id !== mock.id));
-    } catch (err) {
-      alert('Delete failed: ' + err.message);
-    }
+    setConfirmAction({
+      title: 'Delete Mock',
+      message: `Are you sure you want to delete "${mock.name}"? This action cannot be undone.`,
+      variant: 'danger',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        await deleteMock(mock.id);
+        setMocks((prev) => prev.filter((m) => m.id !== mock.id));
+        setConfirmAction(null);
+      },
+    });
   }
 
   function copyCurl(mock) {
@@ -88,19 +125,95 @@ export default function Dashboard() {
     }
   }
 
+  /* ---- Collection handlers ---- */
+
+  function handleNewCollection() {
+    setEditingCollection(null);
+    setShowCollectionModal(true);
+  }
+
+  function handleEditCollection(col) {
+    setEditingCollection(col);
+    setShowCollectionModal(true);
+  }
+
+  async function handleSaveCollection(data) {
+    if (editingCollection) {
+      await updateCollection(editingCollection.id, data);
+    } else {
+      await createCollection(data);
+    }
+    setShowCollectionModal(false);
+    setEditingCollection(null);
+    const res = await getCollections();
+    setCollections(res.data);
+  }
+
+  async function handleDeleteCollection(col) {
+    setConfirmAction({
+      title: 'Delete Collection',
+      message: `Are you sure you want to delete "${col.name}"? Mocks inside will become unassigned.`,
+      variant: 'danger',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        await deleteCollectionApi(col.id);
+        if (activeCollectionId === col.id) setActiveCollectionId(null);
+        const res = await getCollections();
+        setCollections(res.data);
+        setConfirmAction(null);
+      },
+    });
+  }
+
+  async function handleMoveMock(mockId, targetCollectionId) {
+    await moveMockApi(mockId, targetCollectionId);
+    setMovingMock(null);
+    await load();
+  }
+
+  async function handleAcceptInvitation(invId) {
+    try {
+      await acceptInvitation(invId);
+      await load();
+    } catch (err) {
+      alert('Accept failed: ' + err.message);
+    }
+  }
+
+  async function handleDeclineInvitation(invId) {
+    try {
+      await declineInvitation(invId);
+      setInvitations((prev) => prev.filter((i) => i.id !== invId));
+    } catch (err) {
+      alert('Decline failed: ' + err.message);
+    }
+  }
+
   return (
-    <div className="page">
-      <div className="page-header">
-        <h1 className="page-title">Mock Endpoints</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/mocks/new')}
-          disabled={mocks.length >= maxMocks}
-          title={mocks.length >= maxMocks ? 'Mock limit reached' : ''}
-        >
-          + New Mock
-        </button>
-      </div>
+    <div className="dashboard-layout">
+      {isAuthenticated && (
+        <CollectionSidebar
+          collections={collections}
+          activeId={activeCollectionId}
+          onSelect={setActiveCollectionId}
+          onNew={handleNewCollection}
+          onEdit={handleEditCollection}
+          onDelete={handleDeleteCollection}
+        />
+      )}
+
+      <div className="page">
+        <div className="page-header">
+          <h1 className="page-title">Mock Endpoints</h1>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/mocks/new')}
+            disabled={mocks.length >= maxMocks}
+            title={mocks.length >= maxMocks ? 'Mock limit reached' : ''}
+          >
+            + New Mock
+          </button>
+        </div>
 
       {!isAuthenticated && (
         <div className="alert alert-info">
@@ -148,11 +261,33 @@ export default function Dashboard() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* Pending team invitations */}
+      {invitations.length > 0 && (
+        <div className="invitation-banner">
+          <h4>Team Invitations</h4>
+          {invitations.map((inv) => (
+            <div key={inv.id} className="invitation-row">
+              <span>
+                <strong>{inv.inviterEmail}</strong> invited you to join <strong>{inv.teamName}</strong>
+              </span>
+              <div className="invitation-actions">
+                <button className="btn btn-primary btn-sm" onClick={() => handleAcceptInvitation(inv.id)}>
+                  Accept
+                </button>
+                <button className="btn btn-secondary btn-sm" onClick={() => handleDeclineInvitation(inv.id)}>
+                  Decline
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <div className="loading">Loading…</div>
-      ) : mocks.length === 0 ? (
+      ) : displayedMocks.length === 0 ? (
         <div className="empty-state">
-          <strong>No mock endpoints yet</strong>
+          <strong>{activeCollectionId ? 'No mocks in this collection' : 'No mock endpoints yet'}</strong>
           <p>Click <em>New Mock</em> to configure your first one.</p>
         </div>
       ) : (
@@ -163,6 +298,7 @@ export default function Dashboard() {
                 <th>Name</th>
                 <th>Method</th>
                 <th>Path</th>
+                {isAuthenticated && <th>Collection</th>}
                 <th>Status</th>
                 <th>Delay (ms)</th>
                 <th>Timeout sim.</th>
@@ -170,11 +306,18 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {mocks.map((mock) => (
+              {displayedMocks.map((mock) => (
                 <tr key={mock.id}>
                   <td><strong>{mock.name}</strong></td>
                   <td><MethodBadge method={mock.method} /></td>
                   <td><code>{mock.path}</code></td>
+                  {isAuthenticated && (
+                    <td>
+                      <span className="text-muted" style={{ fontSize: 12 }}>
+                        {mock.collectionName || '—'}
+                      </span>
+                    </td>
+                  )}
                   <td><StatusBadge code={mock.statusCode} /></td>
                   <td>{mock.delayMs > 0 ? `${mock.delayMs} ms` : '—'}</td>
                   <td>{mock.simulateTimeout ? '⚡ Yes' : '—'}</td>
@@ -187,18 +330,29 @@ export default function Dashboard() {
                       >
                         {copied === mock.id ? '✓ Copied' : 'curl'}
                       </button>
+                      {isAuthenticated && collections.length > 1 && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => setMovingMock(mock)}
+                          title="Move to another collection"
+                        >
+                          Move
+                        </button>
+                      )}
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => navigate(`/mocks/${mock.id}/edit`)}
                       >
                         Edit
                       </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDelete(mock)}
-                      >
-                        Delete
-                      </button>
+                      {(!mock.userId || mock.userId === user?.id) && (
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDelete(mock)}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -207,6 +361,36 @@ export default function Dashboard() {
           </table>
         </div>
       )}
+
+      {showCollectionModal && (
+        <CollectionModal
+          collection={editingCollection}
+          teams={teams}
+          onSave={handleSaveCollection}
+          onClose={() => { setShowCollectionModal(false); setEditingCollection(null); }}
+        />
+      )}
+
+      {movingMock && (
+        <MoveMockModal
+          mock={movingMock}
+          collections={collections}
+          onMove={handleMoveMock}
+          onClose={() => setMovingMock(null)}
+        />
+      )}
+
+      {confirmAction && (
+        <ConfirmModal
+          title={confirmAction.title}
+          message={confirmAction.message}
+          variant={confirmAction.variant}
+          confirmText={confirmAction.confirmText}
+          onConfirm={confirmAction.onConfirm}
+          onClose={() => setConfirmAction(null)}
+        />
+      )}
     </div>
+  </div>
   );
 }

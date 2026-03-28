@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createMock, getMockById, updateMock } from '../api/mocks';
 import { getScenarios, createScenario, updateScenario, deleteScenario } from '../api/scenarios';
+import { getCollections } from '../api/collections';
 import { useAuth } from '../context/AuthContext';
 import ScenarioBuilder from '../components/ScenarioBuilder';
 
@@ -15,6 +16,7 @@ const EMPTY_FORM = {
   delayMs: 0,
   responseBody: '',
   simulateTimeout: false,
+  collectionId: '',
 };
 
 export default function MockForm() {
@@ -25,6 +27,7 @@ export default function MockForm() {
 
   const [form, setForm]             = useState(EMPTY_FORM);
   const [scenarios, setScenarios]   = useState([]);
+  const [collections, setCollections] = useState([]);
   const [loading, setLoading]       = useState(isEdit);
   const [saving, setSaving]         = useState(false);
   const [error, setError]           = useState(null);
@@ -32,10 +35,19 @@ export default function MockForm() {
 
   let _tempCounter = 0;
 
+  // Load collections for the picker
+  useEffect(() => {
+    if (isAuthenticated) {
+      getCollections()
+        .then((res) => setCollections(res.data))
+        .catch(() => {});
+    }
+  }, [isAuthenticated]);
+
   // Load existing mock + scenarios when editing (once only)
   useEffect(() => {
     if (!isEdit || loaded) return;
-    Promise.all([getMockById(id), isPro ? getScenarios(id).catch(() => ({ data: [] })) : Promise.resolve({ data: [] })])
+    Promise.all([getMockById(id), isAuthenticated ? getScenarios(id).catch(() => ({ data: [] })) : Promise.resolve({ data: [] })])
       .then(([mockRes, scenRes]) => {
         const m = mockRes.data;
         setForm({
@@ -46,6 +58,7 @@ export default function MockForm() {
           delayMs:         m.delayMs,
           responseBody:    m.responseBody ?? '',
           simulateTimeout: m.simulateTimeout,
+          collectionId:    m.collectionId || '',
         });
         setScenarios(scenRes.data.map((s) => ({
           id: s.id,
@@ -87,6 +100,7 @@ export default function MockForm() {
     const payload = {
       ...form,
       responseBody: form.responseBody.trim() || null,
+      collectionId: form.collectionId || null,
     };
 
     try {
@@ -182,6 +196,24 @@ export default function MockForm() {
                 required
               />
             </div>
+
+            {/* Collection */}
+            {isAuthenticated && collections.length > 0 && (
+              <div className="form-group">
+                <label htmlFor="collectionId">Collection</label>
+                <select
+                  id="collectionId"
+                  name="collectionId"
+                  value={form.collectionId}
+                  onChange={handleChange}
+                >
+                  <option value="">None</option>
+                  {collections.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Method */}
             <div className="form-group">

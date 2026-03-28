@@ -42,6 +42,14 @@ export default function Navbar() {
         >
           Logs
         </NavLink>
+        {isAuthenticated && (
+          <NavLink
+            to="/teams"
+            className={({ isActive }) => (isActive ? 'active' : '')}
+          >
+            Teams
+          </NavLink>
+        )}
       </div>
       <div className="navbar-right">
         {isAuthenticated ? (
