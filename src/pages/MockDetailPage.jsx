@@ -6,6 +6,8 @@ import { getOpenApiSpec, getCodeSnippets } from '../api/docs';
 import { getAuthConfig } from '../api/authConfig';
 import { getLogsByEndpoint } from '../api/logs';
 import { useAuth } from '../context/AuthContext';
+import ExportDropdown from '../components/ExportDropdown';
+import { exportMockPostman, exportMockOpenApi } from '../api/export';
 import OverviewTab from '../components/mockdetail/OverviewTab';
 import ScenariosTab from '../components/mockdetail/ScenariosTab';
 import ApiDocsTab from '../components/mockdetail/ApiDocsTab';
@@ -90,6 +92,12 @@ export default function MockDetailPage() {
           <code className="mock-detail-path">{mock.path}</code>
         </div>
         <div className="mock-detail-header-right">
+          {isAuthenticated && (
+            <ExportDropdown
+              onExportPostman={() => exportMockPostman(id)}
+              onExportOpenApi={() => exportMockOpenApi(id)}
+            />
+          )}
           {isAuthenticated && (
             <button className="btn btn-primary btn-sm" onClick={() => navigate(`/mocks/${id}/edit`)}>
               Edit Mock

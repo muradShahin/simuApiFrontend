@@ -50,6 +50,12 @@ export default function Navbar() {
         >
           Logs
         </NavLink>
+        <NavLink
+          to="/import"
+          className={({ isActive }) => (isActive ? 'active' : '')}
+        >
+          Import
+        </NavLink>
         {isAuthenticated && (
           <NavLink
             to="/teams"

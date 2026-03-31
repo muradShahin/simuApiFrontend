@@ -205,14 +205,22 @@ export default function Dashboard() {
       <div className="page">
         <div className="page-header">
           <h1 className="page-title">Mock Endpoints</h1>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate('/mocks/new')}
-            disabled={mocks.length >= maxMocks}
-            title={mocks.length >= maxMocks ? 'Mock limit reached' : ''}
-          >
-            + New Mock
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className="btn btn-ghost"
+              onClick={() => navigate('/import')}
+            >
+              ↓ Import
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate('/mocks/new')}
+              disabled={mocks.length >= maxMocks}
+              title={mocks.length >= maxMocks ? 'Mock limit reached' : ''}
+            >
+              + New Mock
+            </button>
+          </div>
         </div>
 
       {!isAuthenticated && (

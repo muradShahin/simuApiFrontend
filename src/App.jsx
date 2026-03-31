@@ -8,6 +8,7 @@ import Logs from './pages/Logs';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Teams from './pages/Teams';
+import ImportWizard from './pages/ImportWizard';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
                 <Route path="/mocks/:id/edit" element={<MockForm />} />
                 <Route path="/logs" element={<Logs />} />
                 <Route path="/teams" element={<Teams />} />
+                <Route path="/import" element={<ImportWizard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Routes>

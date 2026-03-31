@@ -907,12 +907,35 @@ select { cursor: pointer; }
 
 .scenario-card {
   border-left: 3px solid var(--accent);
+  background: var(--bg-1);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 8px;
 }
 .scenario-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.scenario-card-header:hover {
+  opacity: .85;
+}
+.scenario-expand {
+  font-size: 12px;
+  color: var(--text-3);
+  width: 14px;
+}
+.scenario-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-0);
+}
+.scenario-card-body {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 .scenario-card-title {
   display: flex;
@@ -971,6 +994,68 @@ select { cursor: pointer; }
    Scenario Builder (Edit Form)
    ================================================================ */
 .scenario-builder { margin-top: 4px; }
+
+.scenario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.scenario-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-0);
+}
+.scenario-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Quick-Add template dropdown */
+.template-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.template-trigger {
+  cursor: pointer;
+}
+.template-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 180px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  padding: 4px 0;
+  margin-top: 4px;
+}
+.template-dropdown:hover .template-menu,
+.template-dropdown:focus-within .template-menu {
+  display: block;
+}
+.template-item {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text-1);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s;
+}
+.template-item:hover {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+
 .scenario-builder-header {
   display: flex;
   align-items: center;
@@ -2036,4 +2121,375 @@ select { cursor: pointer; }
   color: var(--text-3);
   font-size: 11px;
   user-select: none;
+}
+
+/* ================================================================
+   Import Wizard
+   ================================================================ */
+
+/* Wizard step indicator */
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 12px 0;
+}
+.wizard-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text-3);
+  position: relative;
+}
+.wizard-step + .wizard-step::before {
+  content: '→';
+  position: absolute;
+  left: -12px;
+  color: var(--text-3);
+  font-size: 11px;
+}
+.wizard-step-number {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--bg-3);
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.wizard-step-active {
+  color: var(--accent);
+}
+.wizard-step-active .wizard-step-number {
+  background: var(--accent);
+  color: #fff;
+}
+.wizard-step-done {
+  color: var(--green);
+}
+.wizard-step-done .wizard-step-number {
+  background: var(--green-dim);
+  color: var(--green);
+}
+.wizard-step-label {
+  font-weight: 500;
+}
+
+/* Import step container */
+.import-step {
+  max-width: 900px;
+}
+.import-step-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-0);
+  margin-bottom: 4px;
+}
+.import-step-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 16px;
+}
+
+/* Mode toggle */
+.import-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* Dropzone */
+.import-dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--bg-1);
+  margin-bottom: 16px;
+}
+.import-dropzone:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.import-dropzone-icon {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 8px;
+}
+.import-dropzone-empty p {
+  margin: 6px 0 4px;
+  color: var(--text-1);
+  font-size: 14px;
+}
+.import-dropzone-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-0);
+}
+
+/* Paste area */
+.import-paste-area {
+  width: 100%;
+  min-height: 240px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+.import-paste-area:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+/* Actions bar */
+.import-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Step 2: Select bar */
+.import-select-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.import-select-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-1);
+  cursor: pointer;
+}
+.import-select-all input { cursor: pointer; }
+
+.import-row-selected {
+  background: var(--accent-dim) !important;
+}
+
+/* Step 3: Collection assign */
+.import-collection-assign {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-1);
+}
+.import-collection-assign > label {
+  font-weight: 600;
+  color: var(--text-0);
+}
+.import-collection-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.import-collection-assign select {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  color: var(--text-0);
+  font-size: 13px;
+  min-width: 180px;
+}
+.import-collection-or {
+  font-size: 12px;
+  color: var(--text-3);
+  font-style: italic;
+}
+.import-collection-create {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.import-collection-create input {
+  padding: 6px 10px;
+  font-size: 13px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-0);
+  min-width: 180px;
+}
+.import-collection-create input::placeholder {
+  color: var(--text-3);
+}
+
+/* Step 3: Edit cards */
+.import-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.import-edit-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.import-edit-card:hover {
+  border-color: var(--border-light);
+}
+.import-edit-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition);
+}
+.import-edit-card-header:hover {
+  background: var(--bg-hover);
+}
+.import-edit-card-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.import-edit-card-summary code {
+  color: var(--text-0);
+}
+.import-edit-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.import-edit-toggle {
+  font-size: 10px;
+  color: var(--text-3);
+}
+.import-edit-card-body {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+}
+.import-edit-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.import-body-editor {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* Step 4: Result summary */
+.import-result-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* ================================================================
+   Export Dropdown
+   ================================================================ */
+.export-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.export-trigger {
+  cursor: pointer;
+}
+.export-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 200px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  padding: 6px 0;
+  margin-top: 4px;
+}
+.export-dropdown:hover .export-menu,
+.export-dropdown:focus-within .export-menu {
+  display: block;
+}
+.export-menu-section {
+  padding: 4px 0;
+}
+.export-menu-label {
+  display: block;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.export-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--text-1);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s;
+}
+.export-menu-item:hover {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+.export-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* ── Toast Notifications ── */
+.export-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  animation: toast-slide-in 0.3s ease;
+}
+.export-toast-success {
+  background: #16a34a;
+}
+.export-toast-error {
+  background: #dc2626;
+}
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
