@@ -56,6 +56,12 @@ export default function Navbar() {
         >
           Import
         </NavLink>
+        <NavLink
+          to="/import/wsdl"
+          className={({ isActive }) => (isActive ? 'active' : '')}
+        >
+          WSDL
+        </NavLink>
         {isAuthenticated && (
           <NavLink
             to="/teams"

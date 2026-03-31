@@ -4,6 +4,7 @@ const CONDITION_TYPES = [
   { value: 'QUERY_PARAM', label: 'Query Param' },
   { value: 'BODY',        label: 'JSON Body' },
   { value: 'HEADER',      label: 'Header' },
+  { value: 'XPATH',       label: 'XPath (XML)' },
 ];
 
 const OPERATORS = [

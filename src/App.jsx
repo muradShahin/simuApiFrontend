@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Teams from './pages/Teams';
 import ImportWizard from './pages/ImportWizard';
+import WsdlImportWizard from './pages/WsdlImportWizard';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
                 <Route path="/logs" element={<Logs />} />
                 <Route path="/teams" element={<Teams />} />
                 <Route path="/import" element={<ImportWizard />} />
+                <Route path="/import/wsdl" element={<WsdlImportWizard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Routes>
