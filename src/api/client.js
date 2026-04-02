@@ -13,7 +13,7 @@ const client = axios.create({
 });
 
 // Restore token from localStorage on app load
-const savedToken = localStorage.getItem('simuapi_token');
+const savedToken = localStorage.getItem('mockcraft_token');
 if (savedToken) {
   client.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
 }

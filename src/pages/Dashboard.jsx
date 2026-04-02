@@ -225,7 +225,7 @@ export default function Dashboard() {
 
       {!isAuthenticated && (
         <div className="alert alert-info">
-          You're using SimuAPI as a <strong>guest</strong> — mocks are stored in memory and limited to 3.{' '}
+          You're using MockCraft as a <strong>guest</strong> — mocks are stored in memory and limited to 3.{' '}
           <a href="/register" style={{ fontWeight: 600 }}>Register free</a> to persist your mocks.
         </div>
       )}

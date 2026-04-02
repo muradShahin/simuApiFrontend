@@ -33,11 +33,11 @@ export default function Register() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <span className="auth-logo-text">Simu<span>API</span></span>
+          <span className="auth-logo-text">Mock<span>Craft</span></span>
         </div>
         <h1 className="auth-title">Create Account</h1>
-        <p className="auth-subtitle">Get started with SimuAPI for free</p>
-        <p className="auth-tagline">Simulate real APIs. Test faster.</p>
+        <p className="auth-subtitle">Get started with MockCraft for free</p>
+        <p className="auth-tagline">Craft real API simulations. Test faster.</p>
 
         {error && <div className="alert alert-error">{error}</div>}
 

@@ -499,7 +499,7 @@ export default function MockForm() {
                           <input
                             value={authConfig.issuer}
                             onChange={(e) => setAuthConfig((prev) => ({ ...prev, issuer: e.target.value }))}
-                            placeholder="simuapi"
+                            placeholder="mockcraft"
                           />
                         </div>
                         <div className="form-group">
@@ -535,7 +535,7 @@ export default function MockForm() {
                           <input
                             value={authConfig.issuer}
                             onChange={(e) => setAuthConfig((prev) => ({ ...prev, issuer: e.target.value }))}
-                            placeholder="simuapi"
+                            placeholder="mockcraft"
                           />
                         </div>
                         <div className="form-group">

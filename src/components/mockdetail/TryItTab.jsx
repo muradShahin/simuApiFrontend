@@ -35,7 +35,7 @@ export default function TryItTab({ mock }) {
     headers.forEach(({ key, value }) => { if (key) hdrs[key] = value; });
 
     // Include auth token so mock execution resolves the correct user's mocks
-    const token = localStorage.getItem('simuapi_token');
+    const token = localStorage.getItem('mockcraft_token');
     if (token) {
       hdrs['Authorization'] = `Bearer ${token}`;
     }

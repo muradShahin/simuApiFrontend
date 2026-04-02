@@ -3,8 +3,8 @@ import client from '../api/client';
 
 const AuthContext = createContext(null);
 
-const TOKEN_KEY = 'simuapi_token';
-const USER_KEY  = 'simuapi_user';
+const TOKEN_KEY = 'mockcraft_token';
+const USER_KEY  = 'mockcraft_user';
 const POLL_INTERVAL = 60 * 1000; // 1 minute
 
 export function AuthProvider({ children }) {

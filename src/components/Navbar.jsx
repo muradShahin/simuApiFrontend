@@ -37,7 +37,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <NavLink to="/dashboard" className="navbar-brand">
-        Simu<span>API</span>
+        Mock<span>Craft</span>
       </NavLink>
       {!isAuthPage && (
         <div className="navbar-links">
