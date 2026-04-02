@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createCheckoutSession } from '../api/billing';
 import { getMyInvitations } from '../api/teams';
@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 export default function Navbar() {
   const { isAuthenticated, user, isPro, isPastDue, isExpired, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthPage = ['/login', '/register'].includes(location.pathname);
   const [upgrading, setUpgrading] = useState(false);
   const [inviteCount, setInviteCount] = useState(0);
 
@@ -37,40 +39,42 @@ export default function Navbar() {
       <NavLink to="/dashboard" className="navbar-brand">
         Simu<span>API</span>
       </NavLink>
-      <div className="navbar-links">
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) => (isActive ? 'active' : '')}
-        >
-          Endpoints
-        </NavLink>
-        <NavLink
-          to="/logs"
-          className={({ isActive }) => (isActive ? 'active' : '')}
-        >
-          Logs
-        </NavLink>
-        <NavLink
-          to="/import"
-          className={({ isActive }) => (isActive ? 'active' : '')}
-        >
-          Import
-        </NavLink>
-        <NavLink
-          to="/import/wsdl"
-          className={({ isActive }) => (isActive ? 'active' : '')}
-        >
-          WSDL
-        </NavLink>
-        {isAuthenticated && (
+      {!isAuthPage && (
+        <div className="navbar-links">
           <NavLink
-            to="/teams"
+            to="/dashboard"
             className={({ isActive }) => (isActive ? 'active' : '')}
           >
-            Teams
+            Endpoints
           </NavLink>
-        )}
-      </div>
+          <NavLink
+            to="/logs"
+            className={({ isActive }) => (isActive ? 'active' : '')}
+          >
+            Logs
+          </NavLink>
+          <NavLink
+            to="/import"
+            className={({ isActive }) => (isActive ? 'active' : '')}
+          >
+            Import
+          </NavLink>
+          <NavLink
+            to="/import/wsdl"
+            className={({ isActive }) => (isActive ? 'active' : '')}
+          >
+            WSDL
+          </NavLink>
+          {isAuthenticated && (
+            <NavLink
+              to="/teams"
+              className={({ isActive }) => (isActive ? 'active' : '')}
+            >
+              Teams
+            </NavLink>
+          )}
+        </div>
+      )}
       <div className="navbar-right">
         {isAuthenticated ? (
           <>
