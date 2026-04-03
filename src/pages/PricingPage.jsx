@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createCheckoutSession } from '../api/billing';
+import { openPaddleCheckout } from '../api/billing';
 
 /* ─── Check icon ─── */
 const Check = () => (
@@ -155,8 +155,7 @@ export default function PricingPage() {
     if (!isAuthenticated) { navigate('/register'); return; }
     setUpgrading(true);
     try {
-      const res = await createCheckoutSession();
-      window.location.href = res.data.url;
+      await openPaddleCheckout();
     } catch {
       setUpgrading(false);
     }

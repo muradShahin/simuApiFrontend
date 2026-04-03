@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { getProfile } from '../api/profile';
-import { createCheckoutSession } from '../api/billing';
+import { openPaddleCheckout } from '../api/billing';
 
 export default function ProfilePage() {
   const { isAuthenticated, user, isPro, isPastDue, isExpired } = useAuth();
@@ -37,10 +37,9 @@ export default function ProfilePage() {
   async function handleUpgrade() {
     setUpgrading(true);
     try {
-      const res = await createCheckoutSession();
-      window.location.href = res.data.url;
+      await openPaddleCheckout();
     } catch (err) {
-      alert('Upgrade failed: ' + (err.response?.data?.message || err.message));
+      if (err.message !== 'Checkout closed') alert('Upgrade failed: ' + (err.response?.data?.message || err.message));
       setUpgrading(false);
     }
   }

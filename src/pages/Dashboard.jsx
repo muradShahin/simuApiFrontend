@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllMocks, deleteMock } from '../api/mocks';
-import { createCheckoutSession } from '../api/billing';
+import { openPaddleCheckout } from '../api/billing';
 import {
   getCollections,
   createCollection,
@@ -111,10 +111,9 @@ export default function Dashboard() {
   async function handleUpgrade() {
     setUpgrading(true);
     try {
-      const res = await createCheckoutSession();
-      window.location.href = res.data.url;
+      await openPaddleCheckout();
     } catch (err) {
-      alert('Upgrade failed: ' + err.message);
+      if (err.message !== 'Checkout closed') alert('Upgrade failed: ' + err.message);
       setUpgrading(false);
     }
   }

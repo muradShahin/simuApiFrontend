@@ -1,6 +1,6 @@
 import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createCheckoutSession } from '../api/billing';
+import { openPaddleCheckout } from '../api/billing';
 import { getMyInvitations } from '../api/teams';
 import { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
@@ -27,10 +27,9 @@ export default function Navbar({ minimal }) {
   async function handleUpgrade() {
     setUpgrading(true);
     try {
-      const res = await createCheckoutSession();
-      window.location.href = res.data.url;
+      await openPaddleCheckout();
     } catch (err) {
-      alert('Upgrade failed: ' + err.message);
+      if (err.message !== 'Checkout closed') alert('Upgrade failed: ' + err.message);
       setUpgrading(false);
     }
   }
