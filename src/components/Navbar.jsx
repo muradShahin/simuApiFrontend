@@ -81,9 +81,9 @@ export default function Navbar() {
         {isAuthenticated ? (
           <>
             {!isPro && (
-              <button className="btn btn-upgrade btn-sm" onClick={handleUpgrade} disabled={upgrading}>
-                {upgrading ? '…' : isPastDue ? 'Fix Payment' : isExpired ? 'Renew PRO' : 'Upgrade to PRO'}
-              </button>
+              <NavLink to="/pricing" className="btn btn-upgrade btn-sm">
+                {isPastDue ? 'Fix Payment' : isExpired ? 'Renew PRO' : 'Upgrade to PRO'}
+              </NavLink>
             )}
             <button
               className="navbar-notifications"

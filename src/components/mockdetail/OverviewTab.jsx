@@ -2,7 +2,7 @@ import MethodBadge from '../MethodBadge';
 import StatusBadge from '../StatusBadge';
 import JsonViewer from '../JsonViewer';
 
-export default function OverviewTab({ mock, scenarios, authConfig, slug }) {
+export default function OverviewTab({ mock, scenarios, authConfig, slug, isPro }) {
   const BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
   const mockPath = mock.path.startsWith('/') ? mock.path : `/${mock.path}`;
   const endpointUrl = `${BASE}/mock/${slug}${mockPath}`;
@@ -56,6 +56,10 @@ export default function OverviewTab({ mock, scenarios, authConfig, slug }) {
           <div className="overview-field">
             <span className="overview-label">Scenarios</span>
             <span className="overview-value">{scenarios.length} configured</span>
+          </div>
+          <div className="overview-field">
+            <span className="overview-label">Rate Limit</span>
+            <span className="overview-value">{isPro ? '200' : '30'} req/min per mock, {isPro ? '1,000' : '100'} req/min per user</span>
           </div>
         </div>
       </div>

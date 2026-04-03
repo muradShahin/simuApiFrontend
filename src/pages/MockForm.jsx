@@ -19,6 +19,9 @@ const EMPTY_FORM = {
   responseHeaders: '',
   simulateTimeout: false,
   collectionId: '',
+  requestBodyTemplate: '',
+  validationEnabled: false,
+  contentType: '',
 };
 
 export default function MockForm() {
@@ -77,6 +80,29 @@ export default function MockForm() {
     return Object.keys(obj).length > 0 ? JSON.stringify(obj) : null;
   }
 
+  function parseRequestParams(val) {
+    if (!val) return [];
+    try {
+      const parsed = typeof val === 'string' ? JSON.parse(val) : val;
+      // Array format: [{ key, type }]
+      if (Array.isArray(parsed)) return parsed;
+      // Object format (legacy): { key: value }
+      if (typeof parsed === 'object') {
+        return Object.entries(parsed).map(([key, value]) => ({
+          key,
+          type: typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'boolean' : 'string',
+        }));
+      }
+      return [];
+    } catch { return []; }
+  }
+
+  function serializeRequestParams(rows) {
+    if (rows.length === 0) return '';
+    // Store as array to preserve empty keys
+    return JSON.stringify(rows);
+  }
+
   // Load collections for the picker
   useEffect(() => {
     if (isAuthenticated) {
@@ -106,6 +132,9 @@ export default function MockForm() {
           responseHeaders: m.responseHeaders ?? '',
           simulateTimeout: m.simulateTimeout,
           collectionId:    m.collectionId || '',
+          requestBodyTemplate: m.requestBodyTemplate ?? '',
+          validationEnabled: m.validationEnabled ?? false,
+          contentType:     m.contentType ?? '',
         });
         setScenarios(scenRes.data.map((s) => ({
           id: s.id,
@@ -142,8 +171,76 @@ export default function MockForm() {
       .finally(() => setLoading(false));
   }, [id, isEdit, isPro, loaded]);
 
+  const isKeyValueContentType = (ct) =>
+    ct === 'application/x-www-form-urlencoded' || ct === 'multipart/form-data';
+
+  // Auto-normalize: if non-KV content type has array-format template, convert it
+  useEffect(() => {
+    if (isKeyValueContentType(form.contentType)) return;
+    if (!form.requestBodyTemplate) return;
+    try {
+      const parsed = JSON.parse(form.requestBodyTemplate);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0] && 'key' in parsed[0]) {
+        const converted = paramsToJsonObject(form.requestBodyTemplate);
+        setForm(prev => ({ ...prev, requestBodyTemplate: converted }));
+      }
+    } catch {}
+  }, [form.contentType]);
+
+  function paramsToJsonObject(val) {
+    const rows = parseRequestParams(val).filter(r => r.key && r.key.trim());
+    if (rows.length === 0) return '';
+    const obj = {};
+    rows.forEach(({ key, type }) => {
+      obj[key.trim()] = type === 'number' ? 0 : type === 'boolean' ? false : 'string';
+    });
+    return JSON.stringify(obj, null, 2);
+  }
+
+  function jsonObjectToParams(val) {
+    if (!val) return '';
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return val; // already params format
+      if (typeof parsed === 'object') {
+        const rows = Object.entries(parsed).map(([key, value]) => ({
+          key,
+          type: typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'boolean' : 'string',
+        }));
+        return rows.length > 0 ? JSON.stringify(rows) : '';
+      }
+      return '';
+    } catch { return ''; }
+  }
+
+  // Detect if a string looks like the params array format [{ key, type }]
+  function looksLikeParamsArray(str) {
+    if (!str) return false;
+    try {
+      const parsed = JSON.parse(str);
+      return Array.isArray(parsed) && parsed.length > 0 && parsed[0] && 'key' in parsed[0];
+    } catch { return false; }
+  }
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
+    if (name === 'contentType') {
+      setForm((prev) => {
+        const wasKV = isKeyValueContentType(prev.contentType);
+        const willBeKV = isKeyValueContentType(value);
+        let newTemplate = prev.requestBodyTemplate;
+        if (wasKV && !willBeKV) {
+          newTemplate = paramsToJsonObject(prev.requestBodyTemplate);
+        } else if (!wasKV && willBeKV) {
+          newTemplate = jsonObjectToParams(prev.requestBodyTemplate);
+        } else if (!willBeKV && looksLikeParamsArray(prev.requestBodyTemplate)) {
+          // Safety net: if somehow array format got into non-KV mode, convert it
+          newTemplate = paramsToJsonObject(prev.requestBodyTemplate);
+        }
+        return { ...prev, contentType: value, requestBodyTemplate: newTemplate };
+      });
+      return;
+    }
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked
@@ -162,6 +259,8 @@ export default function MockForm() {
       responseBody: form.responseBody.trim() || null,
       responseHeaders: headersToObject(form.responseHeaders),
       collectionId: form.collectionId || null,
+      requestBodyTemplate: form.requestBodyTemplate.trim() || null,
+      contentType: form.contentType || null,
     };
 
     try {
@@ -405,82 +504,136 @@ export default function MockForm() {
               </div>
             </div>
 
-            {/* Response Body */}
-            <div className="form-group full-width">
-              <label htmlFor="responseBody">Response Body (JSON)</label>
-              <textarea
-                id="responseBody"
-                name="responseBody"
-                rows={8}
-                value={form.responseBody}
-                onChange={handleChange}
-                placeholder={'{\n  "status": "ok",\n  "data": {}\n}'}
-              />
-            </div>
-
-            {/* Response Headers */}
-            <div className="form-group full-width">
-              <div className="conditions-header">
-                <label>Response Headers</label>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => {
-                    const rows = parseResponseHeaders(form.responseHeaders);
-                    rows.push({ key: '', value: '' });
-                    setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
-                  }}
-                >
-                  + Header
-                </button>
-              </div>
-              {parseResponseHeaders(form.responseHeaders).length === 0 && (
-                <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
-                  No custom response headers. Click "+ Header" to add.
-                </p>
-              )}
-              {parseResponseHeaders(form.responseHeaders).map((h, hi) => (
-                <div className="header-input-row" key={hi}>
-                  <input
-                    placeholder="Header name (e.g. X-Request-Id)"
-                    value={h.key}
-                    onChange={(e) => {
-                      const rows = parseResponseHeaders(form.responseHeaders);
-                      rows[hi] = { ...rows[hi], key: e.target.value };
-                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
-                    }}
-                  />
-                  <input
-                    placeholder="Value"
-                    value={h.value}
-                    disabled={h.value === '{{$guid}}'}
-                    onChange={(e) => {
-                      const rows = parseResponseHeaders(form.responseHeaders);
-                      rows[hi] = { ...rows[hi], value: e.target.value };
-                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={`btn btn-sm ${h.value === '{{$guid}}' ? 'btn-guid-active' : 'btn-ghost'}`}
-                    title="Auto-generate GUID on each request"
-                    onClick={() => {
-                      const rows = parseResponseHeaders(form.responseHeaders);
-                      rows[hi] = { ...rows[hi], value: rows[hi].value === '{{$guid}}' ? '' : '{{$guid}}' };
-                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
-                    }}
-                  >GUID</button>
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm"
-                    onClick={() => {
-                      const rows = parseResponseHeaders(form.responseHeaders).filter((_, i) => i !== hi);
-                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
-                    }}
-                  >×</button>
+            {/* Request Configuration */}
+            {isAuthenticated && (
+              <div className="form-group full-width" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '20px 24px', marginTop: 8 }}>
+                <div className="conditions-header" style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 15, fontWeight: 600, letterSpacing: 0.3 }}>Request Configuration</label>
                 </div>
-              ))}
-            </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="contentType">Expected Content-Type</label>
+                    <select
+                      id="contentType"
+                      name="contentType"
+                      value={form.contentType}
+                      onChange={handleChange}
+                    >
+                      <option value="">Any (no restriction)</option>
+                      <option value="application/json">application/json</option>
+                      <option value="application/xml">application/xml</option>
+                      <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                      <option value="multipart/form-data">multipart/form-data</option>
+                      <option value="text/plain">text/plain</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0, display: 'flex', alignItems: 'end', gap: 8, paddingBottom: 4 }}>
+                    <input
+                      type="checkbox"
+                      id="validationEnabled"
+                      name="validationEnabled"
+                      checked={form.validationEnabled}
+                      onChange={handleChange}
+                    />
+                    <label htmlFor="validationEnabled" style={{ margin: 0, cursor: 'pointer' }}>
+                      Enable Request Body Validation
+                    </label>
+                  </div>
+                </div>
+
+                {(form.contentType === 'application/x-www-form-urlencoded' || form.contentType === 'multipart/form-data') ? (
+                  <div style={{ background: 'var(--bg)', borderRadius: 8, padding: 16, border: '1px solid var(--border)', width: '100%', boxSizing: 'border-box' }}>
+                    <div className="conditions-header" style={{ marginBottom: 8 }}>
+                      <label>Expected Request Parameters</label>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => {
+                          setForm((prev) => {
+                            const rows = parseRequestParams(prev.requestBodyTemplate);
+                            rows.push({ key: '', type: 'string' });
+                            return { ...prev, requestBodyTemplate: serializeRequestParams(rows) };
+                          });
+                        }}
+                      >+ Parameter</button>
+                    </div>
+                    {parseRequestParams(form.requestBodyTemplate).length === 0 && (
+                      <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                        No parameters defined. Click "+ Parameter" to add expected form fields.
+                      </p>
+                    )}
+                    {parseRequestParams(form.requestBodyTemplate).map((p, pi) => (
+                      <div className="header-input-row" key={pi} style={{ marginBottom: 6 }}>
+                        <input
+                          placeholder="Parameter name"
+                          value={p.key}
+                          onChange={(e) => {
+                            const newKey = e.target.value;
+                            setForm((prev) => {
+                              const rows = parseRequestParams(prev.requestBodyTemplate);
+                              rows[pi] = { ...rows[pi], key: newKey };
+                              return { ...prev, requestBodyTemplate: serializeRequestParams(rows) };
+                            });
+                          }}
+                          style={{ flex: 2 }}
+                        />
+                        <select
+                          value={p.type}
+                          onChange={(e) => {
+                            const newType = e.target.value;
+                            setForm((prev) => {
+                              const rows = parseRequestParams(prev.requestBodyTemplate);
+                              rows[pi] = { ...rows[pi], type: newType };
+                              return { ...prev, requestBodyTemplate: serializeRequestParams(rows) };
+                            });
+                          }}
+                          style={{ flex: 1 }}
+                        >
+                          <option value="string">string</option>
+                          <option value="number">number</option>
+                          <option value="boolean">boolean</option>
+                        </select>
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={() => {
+                            setForm((prev) => {
+                              const rows = parseRequestParams(prev.requestBodyTemplate).filter((_, i) => i !== pi);
+                              return { ...prev, requestBodyTemplate: serializeRequestParams(rows) };
+                            });
+                          }}
+                        >×</button>
+                      </div>
+                    ))}
+                    {form.validationEnabled && parseRequestParams(form.requestBodyTemplate).length > 0 && (
+                      <p className="text-muted" style={{ fontSize: 12, marginTop: 8 }}>
+                        Incoming requests will be validated for required parameters and type matching.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ background: 'var(--bg)', borderRadius: 8, padding: 16, border: '1px solid var(--border)', width: '100%', boxSizing: 'border-box' }}>
+                    <label htmlFor="requestBodyTemplate">Expected Request Body (JSON Template)</label>
+                    <textarea
+                      id="requestBodyTemplate"
+                      name="requestBodyTemplate"
+                      rows={8}
+                      value={form.requestBodyTemplate}
+                      onChange={handleChange}
+                      placeholder={'{\n  "name": "string",\n  "age": 0,\n  "active": true\n}'}
+                      style={{ fontFamily: 'monospace', fontSize: 13, width: '100%', boxSizing: 'border-box' }}
+                    />
+                    {form.validationEnabled && (
+                      <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                        Incoming requests will be validated for required fields and type matching.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Authentication Simulation */}
             {isAuthenticated && (
@@ -635,6 +788,83 @@ export default function MockForm() {
                 </div>
               </div>
             )}
+
+            {/* Response Body */}
+            <div className="form-group full-width">
+              <label htmlFor="responseBody">Response Body (JSON)</label>
+              <textarea
+                id="responseBody"
+                name="responseBody"
+                rows={8}
+                value={form.responseBody}
+                onChange={handleChange}
+                placeholder={'{\n  "status": "ok",\n  "data": {}\n}'}
+              />
+            </div>
+
+            {/* Response Headers */}
+            <div className="form-group full-width">
+              <div className="conditions-header">
+                <label>Response Headers</label>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    const rows = parseResponseHeaders(form.responseHeaders);
+                    rows.push({ key: '', value: '' });
+                    setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                  }}
+                >
+                  + Header
+                </button>
+              </div>
+              {parseResponseHeaders(form.responseHeaders).length === 0 && (
+                <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                  No custom response headers. Click "+ Header" to add.
+                </p>
+              )}
+              {parseResponseHeaders(form.responseHeaders).map((h, hi) => (
+                <div className="header-input-row" key={hi}>
+                  <input
+                    placeholder="Header name (e.g. X-Request-Id)"
+                    value={h.key}
+                    onChange={(e) => {
+                      const rows = parseResponseHeaders(form.responseHeaders);
+                      rows[hi] = { ...rows[hi], key: e.target.value };
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  />
+                  <input
+                    placeholder="Value"
+                    value={h.value}
+                    disabled={h.value === '{{$guid}}'}
+                    onChange={(e) => {
+                      const rows = parseResponseHeaders(form.responseHeaders);
+                      rows[hi] = { ...rows[hi], value: e.target.value };
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${h.value === '{{$guid}}' ? 'btn-guid-active' : 'btn-ghost'}`}
+                    title="Auto-generate GUID on each request"
+                    onClick={() => {
+                      const rows = parseResponseHeaders(form.responseHeaders);
+                      rows[hi] = { ...rows[hi], value: rows[hi].value === '{{$guid}}' ? '' : '{{$guid}}' };
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  >GUID</button>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => {
+                      const rows = parseResponseHeaders(form.responseHeaders).filter((_, i) => i !== hi);
+                      setForm((prev) => ({ ...prev, responseHeaders: serializeResponseHeaders(rows) }));
+                    }}
+                  >×</button>
+                </div>
+              ))}
+            </div>
 
             {/* Scenarios */}
             {isAuthenticated && (

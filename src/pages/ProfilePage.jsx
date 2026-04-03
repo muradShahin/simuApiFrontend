@@ -163,7 +163,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="alert alert-info" style={{ marginBottom: 0 }}>
-                  Free plan — up to 6 endpoints, 2 scenarios per mock, 3 imports/month. Upgrade to PRO for unlimited access.
+                  Free plan — up to 6 endpoints, 2 scenarios per mock, 3 imports/month, 30 req/min per mock, 100 req/min total. Upgrade to PRO for unlimited access.
                 </div>
               )}
             </div>

@@ -232,7 +232,7 @@ export default function Dashboard() {
       )}
       {isAuthenticated && isPro && upgradeStatus === null && (
         <div className="alert alert-success">
-          <strong>PRO plan</strong> — Unlimited mocks and scenarios enabled.
+          <strong>PRO plan</strong> — Unlimited mocks, scenarios, and 200 req/min per mock.
           {user.subscriptionExpiry && <span> Renews {new Date(user.subscriptionExpiry).toLocaleDateString()}</span>}
         </div>
       )}
@@ -260,7 +260,7 @@ export default function Dashboard() {
       {isAuthenticated && !isPro && !isPastDue && !isExpired && (
         <div className="alert alert-info" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <span>
-            <strong>Free plan</strong> — {mocks.length}/6 mocks used. 2 scenarios per mock.
+            <strong>Free plan</strong> — {mocks.length}/6 mocks used. 2 scenarios per mock. 30 req/min per mock.
           </span>
           <button className="btn btn-upgrade btn-sm" onClick={handleUpgrade} disabled={upgrading}>
             {upgrading ? 'Redirecting…' : 'Upgrade to PRO'}
