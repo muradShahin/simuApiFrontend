@@ -77,7 +77,7 @@ export default function Login() {
           Or continue as <Link to="/dashboard">anonymous</Link> (limited features)
         </p>
         <p className="auth-guest-link">
-          <Link to="/terms">Terms of Service</Link>
+          <Link to="/terms">Terms of Service</Link> · <Link to="/privacy">Privacy Policy</Link>
         </p>
       </div>
     </div>

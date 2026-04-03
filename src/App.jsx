@@ -14,12 +14,13 @@ import WsdlImportWizard from './pages/WsdlImportWizard';
 import ProfilePage from './pages/ProfilePage';
 import PricingPage from './pages/PricingPage';
 import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import LandingPage from './pages/LandingPage';
 
 function AppRoutes() {
   const location = useLocation();
   const isLandingPage = location.pathname === '/landing';
-  const isMinimalNav = ['/terms', '/pricing'].includes(location.pathname);
+  const isMinimalNav = ['/terms', '/pricing', '/privacy'].includes(location.pathname);
 
   return (
     <div className="app">
@@ -40,6 +41,7 @@ function AppRoutes() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>

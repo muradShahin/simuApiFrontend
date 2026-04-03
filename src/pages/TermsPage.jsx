@@ -62,19 +62,28 @@ const sections = [
     title: '5. Subscription and Payments',
     content: (
       <>
-        <p>MockCraft offers a free tier and a paid Pro subscription. Payment is processed securely through Stripe.</p>
+        <p>MockCraft offers a free tier and a paid Pro subscription. Payment is processed securely through Paddle, our merchant of record.</p>
         <ul>
           <li>Pro subscriptions are billed monthly</li>
           <li>You may cancel at any time; access continues until the end of the billing period</li>
-          <li>No refunds are provided for partial billing periods</li>
           <li>Failed payments may result in downgrade to the Free plan</li>
         </ul>
       </>
     ),
   },
   {
+    id: 'refunds',
+    title: '6. Refund Policy',
+    content: (
+      <>
+        <p>We offer refunds in accordance with Paddle's refund policy. Customers are eligible for a full refund within 14 days of the initial purchase.</p>
+        <p>Refund requests are handled through Paddle as our payment provider. To request a refund, please contact us at <a href="mailto:shahinmurad43@gmail.com">shahinmurad43@gmail.com</a> or reach out to Paddle directly.</p>
+      </>
+    ),
+  },
+  {
     id: 'ip',
-    title: '6. Intellectual Property',
+    title: '7. Intellectual Property',
     content: (
       <>
         <p>You retain ownership of all mock configurations and response data you create on MockCraft. We do not claim any intellectual property rights over your content.</p>
@@ -84,7 +93,7 @@ const sections = [
   },
   {
     id: 'sharing',
-    title: '7. Public Sharing',
+    title: '8. Public Sharing',
     content: (
       <>
         <p>Mock endpoints you create are accessible via public URLs. You are solely responsible for the content served by your mock endpoints.</p>
@@ -98,21 +107,21 @@ const sections = [
   },
   {
     id: 'warranties',
-    title: '8. Disclaimer of Warranties',
+    title: '9. Disclaimer of Warranties',
     content: (
       <p>MockCraft is provided on an "as is" and "as available" basis without warranties of any kind, whether express or implied. We do not guarantee that the service will be uninterrupted, error-free, or free of harmful components. Mock endpoints may experience downtime during maintenance or scaling operations.</p>
     ),
   },
   {
     id: 'liability',
-    title: '9. Limitation of Liability',
+    title: '10. Limitation of Liability',
     content: (
       <p>To the maximum extent permitted by law, MockCraft and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of data, revenue, or business opportunities, arising from your use of or inability to use the service.</p>
     ),
   },
   {
     id: 'termination',
-    title: '10. Termination',
+    title: '11. Termination',
     content: (
       <>
         <p>We may suspend or terminate your access to MockCraft at any time, with or without cause, including but not limited to:</p>
@@ -127,14 +136,14 @@ const sections = [
   },
   {
     id: 'changes',
-    title: '11. Changes to Terms',
+    title: '12. Changes to Terms',
     content: (
       <p>We reserve the right to modify these Terms of Service at any time. When we make material changes, we will update the "Last updated" date at the top of this page. Continued use of MockCraft after changes constitutes acceptance of the revised terms.</p>
     ),
   },
   {
     id: 'contact',
-    title: '12. Contact',
+    title: '13. Contact',
     content: (
       <>
         <p>If you have questions about these Terms of Service, please contact us:</p>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllMocks, deleteMock } from '../api/mocks';
-import { createCheckoutSession, verifyCheckoutSession } from '../api/billing';
+import { createCheckoutSession } from '../api/billing';
 import {
   getCollections,
   createCollection,
@@ -42,17 +42,10 @@ export default function Dashboard() {
   const maxMocks = !isAuthenticated ? 3 : (isPro ? Infinity : 6);
   const upgradeStatus = searchParams.get('upgrade');
 
-  // After returning from Stripe, verify the session and upgrade user
+  // After returning from Paddle checkout, refresh user to pick up webhook changes
   useEffect(() => {
     if (upgradeStatus === 'success') {
-      const sessionId = searchParams.get('session_id');
-      if (sessionId) {
-        verifyCheckoutSession(sessionId)
-          .then(() => refreshUser())
-          .catch((err) => console.error('Session verification failed:', err));
-      } else {
-        refreshUser();
-      }
+      refreshUser();
       setSearchParams({}, { replace: true });
     } else if (upgradeStatus === 'canceled') {
       setSearchParams({}, { replace: true });
