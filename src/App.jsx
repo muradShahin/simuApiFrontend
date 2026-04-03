@@ -13,15 +13,17 @@ import ImportWizard from './pages/ImportWizard';
 import WsdlImportWizard from './pages/WsdlImportWizard';
 import ProfilePage from './pages/ProfilePage';
 import PricingPage from './pages/PricingPage';
+import TermsPage from './pages/TermsPage';
 import LandingPage from './pages/LandingPage';
 
 function AppRoutes() {
   const location = useLocation();
   const isLandingPage = location.pathname === '/landing';
+  const isMinimalNav = ['/terms', '/pricing'].includes(location.pathname);
 
   return (
     <div className="app">
-      {!isLandingPage && <Navbar />}
+      {!isLandingPage && <Navbar minimal={isMinimalNav} />}
       <div className={isLandingPage ? '' : 'app-body'}>
         <main className={isLandingPage ? '' : 'main-content'}>
           <Routes>
@@ -37,6 +39,7 @@ function AppRoutes() {
             <Route path="/import/wsdl" element={<WsdlImportWizard />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>

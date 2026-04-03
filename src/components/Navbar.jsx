@@ -5,7 +5,7 @@ import { getMyInvitations } from '../api/teams';
 import { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
 
-export default function Navbar() {
+export default function Navbar({ minimal }) {
   const { isAuthenticated, user, isPro, isPastDue, isExpired, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +40,7 @@ export default function Navbar() {
       <NavLink to="/dashboard" className="navbar-brand">
         Mock<span>Craft</span>
       </NavLink>
-      {!isAuthPage && (
+      {!isAuthPage && !minimal && (
         <div className="navbar-links">
           <NavLink
             to="/dashboard"

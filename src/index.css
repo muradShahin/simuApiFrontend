@@ -3370,3 +3370,76 @@ select { cursor: pointer; }
     min-width: 120px;
   }
 }
+
+/* ================================================================
+   Terms of Service Page
+   ================================================================ */
+.terms-page {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.terms-header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.terms-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-0);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.terms-updated {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.terms-intro {
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.terms-section {
+  margin-bottom: 32px;
+}
+.terms-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-0);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.terms-section-body p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.terms-section-body ul {
+  list-style: disc;
+  padding-left: 22px;
+  margin-bottom: 10px;
+}
+.terms-section-body li {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+.terms-section-body strong {
+  color: var(--text-1);
+  font-weight: 600;
+}
+.terms-section-body a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.terms-section-body a:hover {
+  text-decoration: underline;
+}

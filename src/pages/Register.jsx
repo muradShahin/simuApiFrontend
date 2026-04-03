@@ -93,6 +93,9 @@ export default function Register() {
         <p className="auth-guest-link">
           Or continue as <Link to="/dashboard">anonymous</Link> (limited features)
         </p>
+        <p className="auth-guest-link">
+          By signing up, you agree to our <Link to="/terms">Terms of Service</Link>
+        </p>
       </div>
     </div>
   );
