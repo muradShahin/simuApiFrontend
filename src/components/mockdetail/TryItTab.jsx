@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import JsonViewer from '../JsonViewer';
 
-export default function TryItTab({ mock }) {
+export default function TryItTab({ mock, slug }) {
   const BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
   const [queryParams, setQueryParams] = useState([{ key: '', value: '' }]);
@@ -27,7 +27,7 @@ export default function TryItTab({ mock }) {
     setResponse(null);
 
     const path = mock.path.startsWith('/') ? mock.path : `/${mock.path}`;
-    const url = `${BASE}/mock${path}`;
+    const url = `${BASE}/mock/${slug}${path}`;
     const params = {};
     queryParams.forEach(({ key, value }) => { if (key) params[key] = value; });
 
@@ -97,7 +97,7 @@ export default function TryItTab({ mock }) {
         <div className="tryit-panel-body">
           <div className="tryit-url-bar">
             <span className={`badge badge-${method.toLowerCase()}`}>{method}</span>
-            <input readOnly value={`/mock/${mock.path}`} />
+            <input readOnly value={`/mock/${slug}${mock.path.startsWith('/') ? '' : '/'}${mock.path}`} />
           </div>
 
           {/* Query Parameters */}

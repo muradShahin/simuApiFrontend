@@ -103,7 +103,8 @@ export default function Dashboard() {
   }
 
   function copyCurl(mock) {
-    const url = `${BASE}/mock${mock.path}`;
+    const mockPath = mock.path.startsWith('/') ? mock.path : `/${mock.path}`;
+    const url = `${BASE}/mock/${user?.slug}${mockPath}`;
     const hasBody = ['POST', 'PUT', 'PATCH'].includes(mock.method);
     const bodyPart = hasBody && mock.responseBody
       ? ` \\\n  -d '${mock.responseBody.replace(/'/g, "\\'")}'`

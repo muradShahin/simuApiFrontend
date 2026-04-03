@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
       const data = res.data;
       client.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setToken(data.token);
-      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus };
+      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, slug: data.slug };
       setUser(u);
       localStorage.setItem(USER_KEY, JSON.stringify(u));
       return u;
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
       const data = res.data;
       client.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setToken(data.token);
-      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus };
+      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, slug: data.slug };
       setUser(u);
       localStorage.setItem(USER_KEY, JSON.stringify(u));
       return u;
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await client.get('/auth/me');
       const data = res.data;
-      const u = { id: data.id, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, subscriptionExpiry: data.subscriptionExpiry };
+      const u = { id: data.id, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, subscriptionExpiry: data.subscriptionExpiry, slug: data.slug };
       setUser(u);
       localStorage.setItem(USER_KEY, JSON.stringify(u));
       return u;

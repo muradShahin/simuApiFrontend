@@ -9,7 +9,7 @@ const STEPS = ['Upload WSDL', 'Select Operations', 'Edit & Assign', 'Confirm'];
 
 export default function WsdlImportWizard() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const fileInputRef = useRef(null);
 
   const [step, setStep] = useState(0);
@@ -335,7 +335,7 @@ export default function WsdlImportWizard() {
                     />
                   </div>
                   <div className="wsdl-edit-card-meta">
-                    <code className="wsdl-edit-path">/mock/wsdl/{op.operationName}</code>
+                    <code className="wsdl-edit-path">/mock/{user?.slug}/wsdl/{op.operationName}</code>
                     <span className="wsdl-edit-toggle">{editingIndex === i ? '▾' : '▸'}</span>
                   </div>
                 </div>
@@ -412,7 +412,7 @@ export default function WsdlImportWizard() {
                           <span className="method-badge method-post">POST</span>
                           <strong>{m.name}</strong>
                         </div>
-                        <code className="wsdl-result-item-path">/mock{m.path}</code>
+                        <code className="wsdl-result-item-path">/mock/{user?.slug}{m.path}</code>
                       </div>
                     ))}
                   </div>

@@ -27,7 +27,7 @@ const TABS = [
 export default function MockDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const [mock, setMock]           = useState(null);
   const [scenarios, setScenarios] = useState([]);
@@ -119,11 +119,11 @@ export default function MockDetailPage() {
       </div>
 
       <div className="mock-tab-content">
-        {activeTab === 'overview'  && <OverviewTab mock={mock} scenarios={scenarios} authConfig={authConfig} />}
+        {activeTab === 'overview'  && <OverviewTab mock={mock} scenarios={scenarios} authConfig={authConfig} slug={user?.slug} />}
         {activeTab === 'scenarios' && <ScenariosTab mock={mock} scenarios={scenarios} />}
         {activeTab === 'api-docs'  && <ApiDocsTab spec={openApiSpec} />}
         {activeTab === 'snippets'  && <CodeSnippetsTab snippets={snippets} />}
-        {activeTab === 'try-it'    && <TryItTab mock={mock} />}
+        {activeTab === 'try-it'    && <TryItTab mock={mock} slug={user?.slug} />}
         {activeTab === 'logs'      && <MockLogsTab logs={logs} onRefresh={loadLogs} />}
       </div>
     </div>

@@ -25,7 +25,7 @@ export default function MockForm() {
   const { id }      = useParams();
   const navigate    = useNavigate();
   const isEdit      = Boolean(id);
-  const { isPro, isAuthenticated } = useAuth();
+  const { isPro, isAuthenticated, user } = useAuth();
 
   const [form, setForm]             = useState(EMPTY_FORM);
   const [scenarios, setScenarios]   = useState([]);
@@ -305,7 +305,7 @@ export default function MockForm() {
                 placeholder="/crif/check"
                 required
               />
-              <span className="form-hint">Must start with /. Accessible at /mock{form.path || '...'}</span>
+              <span className="form-hint">Must start with /. Accessible at /mock/{user?.slug}{form.path || '...'}</span>
             </div>
 
             {/* Status code */}

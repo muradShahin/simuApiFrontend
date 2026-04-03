@@ -2,9 +2,10 @@ import MethodBadge from '../MethodBadge';
 import StatusBadge from '../StatusBadge';
 import JsonViewer from '../JsonViewer';
 
-export default function OverviewTab({ mock, scenarios, authConfig }) {
+export default function OverviewTab({ mock, scenarios, authConfig, slug }) {
   const BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
-  const endpointUrl = `${BASE}/mock/${mock.path}`;
+  const mockPath = mock.path.startsWith('/') ? mock.path : `/${mock.path}`;
+  const endpointUrl = `${BASE}/mock/${slug}${mockPath}`;
 
   let responseHeaders = null;
   if (mock.responseHeaders) {
