@@ -31,6 +31,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await client.post('/auth/login', { email, password });
       const data = res.data;
+      client.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setToken(data.token);
       const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus };
       setUser(u);
@@ -46,6 +47,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await client.post('/auth/register', { email, password });
       const data = res.data;
+      client.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setToken(data.token);
       const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus };
       setUser(u);

@@ -1,4 +1,9 @@
 const features = [
+      {
+    emoji: '🛠️',
+    title: 'Mocking API',
+    description: 'Build your mock API with an intuitive interface. Define endpoints, set response bodies, status codes, and headers. Your mock is live in seconds.',
+  },
   {
     emoji: '🎭',
     title: 'Scenario Engine',
