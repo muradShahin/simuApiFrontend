@@ -1,8 +1,9 @@
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createCheckoutSession } from '../api/billing';
 import { getMyInvitations } from '../api/teams';
 import { useState, useEffect } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const { isAuthenticated, user, isPro, isPastDue, isExpired, logout } = useAuth();
@@ -76,6 +77,7 @@ export default function Navbar() {
         </div>
       )}
       <div className="navbar-right">
+        <ThemeToggle />
         {isAuthenticated ? (
           <>
             {!isPro && (
@@ -91,10 +93,10 @@ export default function Navbar() {
               🔔
               {inviteCount > 0 && <span className="navbar-notif-dot" />}
             </button>
-            <span className="navbar-user">
+            <Link to="/profile" className="navbar-user" title="View profile">
               {user.email}
               <span className={`plan-badge plan-${user.plan?.toLowerCase()}`}>{user.plan}</span>
-            </span>
+            </Link>
             <button className="btn btn-ghost btn-sm navbar-btn" onClick={handleLogout}>
               Logout
             </button>

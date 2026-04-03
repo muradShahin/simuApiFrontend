@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{js,jsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -14,21 +15,21 @@ export default {
           dim: 'rgba(99,102,241,.12)',
         },
         surface: {
-          0: '#0a0b0f',
-          1: '#111318',
-          2: '#1a1d24',
-          3: '#22262f',
-          4: '#2a2f3a',
+          0: 'var(--bg-0)',
+          1: 'var(--bg-1)',
+          2: 'var(--bg-2)',
+          3: 'var(--bg-3)',
+          4: 'var(--bg-4)',
         },
         border: {
-          DEFAULT: '#2a2f3a',
-          light: '#333845',
+          DEFAULT: 'var(--border)',
+          light: 'var(--border-light)',
         },
         text: {
-          primary: '#f1f3f5',
-          secondary: '#c9cdd5',
-          muted: '#8b92a0',
-          dim: '#5c6370',
+          primary: 'var(--text-0)',
+          secondary: 'var(--text-1)',
+          muted: 'var(--text-2)',
+          dim: 'var(--text-3)',
         },
         green: {
           DEFAULT: '#22c55e',

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ThemeToggle from '../ThemeToggle';
 
 export default function LandingNav() {
   return (
@@ -24,6 +25,7 @@ export default function LandingNav() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Link
             to="/login"
             className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"

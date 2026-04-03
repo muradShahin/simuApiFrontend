@@ -1,9 +1,9 @@
 /* ================================================================
-   MockCraft — Dark Mode Design System
+   MockCraft — Design System (Dark + Light)
    Inspired by Postman, Swagger UI, Stripe Dashboard
    ================================================================ */
 
-/* ---- CSS Variables / Design Tokens ---- */
+/* ---- CSS Variables / Design Tokens (Dark — default) ---- */
 :root {
   --bg-0: #0a0b0f;
   --bg-1: #111318;
@@ -57,6 +57,61 @@
   --transition: 150ms ease;
 }
 
+/* ---- Light Theme Overrides ---- */
+[data-theme="light"] {
+  --bg-0: #ffffff;
+  --bg-1: #f8f9fb;
+  --bg-2: #f0f1f4;
+  --bg-3: #e5e7ec;
+  --bg-4: #d8dbe2;
+  --bg-hover: #eceef2;
+  --bg-active: #e2e5ea;
+
+  --border: #d1d5dc;
+  --border-light: #e2e5ea;
+  --border-focus: #6366f1;
+
+  --text-0: #111827;
+  --text-1: #374151;
+  --text-2: #6b7280;
+  --text-3: #9ca3af;
+
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-dim: rgba(99,102,241,.08);
+  --accent-text: #4338ca;
+
+  --green-dim: rgba(34,197,94,.10);
+  --yellow-dim: rgba(234,179,8,.10);
+  --red-dim: rgba(239,68,68,.10);
+  --orange-dim: rgba(249,115,22,.10);
+  --cyan-dim: rgba(6,182,212,.10);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+}
+
+/* ---- Theme Toggle Button ---- */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.theme-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text-0);
+  border-color: var(--border-light);
+}
+
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -64,6 +119,11 @@ html {
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
@@ -167,6 +227,12 @@ code, pre { font-family: var(--font-mono); }
   display: flex;
   align-items: center;
   gap: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.navbar-user:hover {
+  color: var(--text-0);
 }
 
 /* ================================================================
@@ -2836,4 +2902,178 @@ select { cursor: pointer; }
   border-radius: 4px;
   background: var(--bg-3);
   color: var(--green, #10b981);
+}
+
+/* ================================================================
+   Profile Page
+   ================================================================ */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.profile-card {
+  display: flex;
+  flex-direction: column;
+}
+.profile-card-wide {
+  grid-column: 1 / -1;
+}
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.profile-card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.profile-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-0);
+  margin: 0;
+}
+.profile-card-subtitle {
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 2px 0 0;
+}
+.profile-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.profile-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.profile-field:last-child { border-bottom: none; }
+.profile-field-action {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.profile-field-action > div {
+  display: flex;
+  flex-direction: column;
+}
+.profile-label {
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+.profile-value {
+  font-size: 13px;
+  color: var(--text-1);
+}
+.profile-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-3);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+.profile-plan-info {
+  margin-top: 4px;
+}
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  text-align: center;
+}
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  background: var(--bg-3);
+  border-radius: var(--radius);
+}
+.profile-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-0);
+  line-height: 1;
+}
+.profile-stat-label {
+  font-size: 11px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+.profile-limit-bar {
+  margin-top: 4px;
+}
+.profile-limit-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.profile-limit-track {
+  height: 6px;
+  background: var(--bg-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.profile-limit-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.profile-teams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-team-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--bg-3);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.profile-team-item:hover {
+  background: var(--bg-4);
+}
+.profile-team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.profile-team-info strong {
+  font-size: 13px;
+  color: var(--text-0);
+}
+
+@media (max-width: 700px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

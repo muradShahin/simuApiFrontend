@@ -8,8 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
     <title>MockCraft — Craft Real API Simulations</title>
-    <script type="module" crossorigin src="/assets/index-DGoWyZBI.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-B0P7sS6u.css">
+    <script>
+      // Anti-flicker: apply saved theme before first paint
+      (function() {
+        var t = localStorage.getItem('mockcraft_theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        if (t === 'dark') document.documentElement.classList.add('dark');
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-dNgmwD0C.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-07GTEpz8.css">
   </head>
   <body>
     <div id="root"></div>

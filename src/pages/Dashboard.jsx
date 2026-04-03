@@ -39,7 +39,7 @@ export default function Dashboard() {
   const [teams, setTeams] = useState([]);
   const [confirmAction, setConfirmAction] = useState(null); // { title, message, variant, confirmText, onConfirm }
 
-  const maxMocks = !isAuthenticated ? 3 : (isPro ? Infinity : 3);
+  const maxMocks = !isAuthenticated ? 3 : (isPro ? Infinity : 6);
   const upgradeStatus = searchParams.get('upgrade');
 
   // After returning from Stripe, verify the session and upgrade user
@@ -250,7 +250,7 @@ export default function Dashboard() {
       {isAuthenticated && isExpired && (
         <div className="alert alert-warning" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <span>
-            <strong>Subscription expired</strong> — Your PRO plan has ended. You're now on the Free plan (3 mocks, no scenarios).
+            <strong>Subscription expired</strong> — Your PRO plan has ended. You're now on the Free plan (6 mocks, 2 scenarios per mock).
           </span>
           <button className="btn btn-upgrade btn-sm" onClick={handleUpgrade} disabled={upgrading}>
             {upgrading ? 'Redirecting…' : 'Renew PRO'}
@@ -260,7 +260,7 @@ export default function Dashboard() {
       {isAuthenticated && !isPro && !isPastDue && !isExpired && (
         <div className="alert alert-info" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <span>
-            <strong>Free plan</strong> — {mocks.length}/3 mocks used. Scenarios are disabled.
+            <strong>Free plan</strong> — {mocks.length}/6 mocks used. 2 scenarios per mock.
           </span>
           <button className="btn btn-upgrade btn-sm" onClick={handleUpgrade} disabled={upgrading}>
             {upgrading ? 'Redirecting…' : 'Upgrade to PRO'}

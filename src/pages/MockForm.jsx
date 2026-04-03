@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createMock, getMockById, updateMock } from '../api/mocks';
 import { getScenarios, createScenario, updateScenario, deleteScenario } from '../api/scenarios';
-import { getCollections } from '../api/collections';
+import { getCollections, createCollection } from '../api/collections';
 import { getAuthConfig, saveAuthConfig } from '../api/authConfig';
 import { useAuth } from '../context/AuthContext';
 import ScenarioBuilder from '../components/ScenarioBuilder';
@@ -34,6 +34,10 @@ export default function MockForm() {
   const [saving, setSaving]         = useState(false);
   const [error, setError]           = useState(null);
   const [loaded, setLoaded]         = useState(false);
+
+  const [showNewCollection, setShowNewCollection] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [creatingCollection, setCreatingCollection] = useState(false);
 
   const [authConfig, setAuthConfig] = useState({
     type: 'NONE',
@@ -169,8 +173,8 @@ export default function MockForm() {
         mockId = res.data.id;
       }
 
-      // Persist scenarios (PRO only)
-      if (isPro && mockId) {
+      // Persist scenarios (authenticated users)
+      if (isAuthenticated && mockId) {
         for (const sc of scenarios) {
           const body = {
             name: sc.name,
@@ -261,20 +265,66 @@ export default function MockForm() {
             </div>
 
             {/* Collection */}
-            {isAuthenticated && collections.length > 0 && (
+            {isAuthenticated && (
               <div className="form-group">
                 <label htmlFor="collectionId">Collection</label>
-                <select
-                  id="collectionId"
-                  name="collectionId"
-                  value={form.collectionId}
-                  onChange={handleChange}
-                >
-                  <option value="">None</option>
-                  {collections.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                {!showNewCollection ? (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <select
+                      id="collectionId"
+                      name="collectionId"
+                      value={form.collectionId}
+                      onChange={handleChange}
+                      style={{ flex: 1 }}
+                    >
+                      <option value="">None</option>
+                      {collections.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setShowNewCollection(true)}
+                      title="Create new collection"
+                    >+ New</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input
+                      type="text"
+                      placeholder="Collection name"
+                      value={newCollectionName}
+                      onChange={(e) => setNewCollectionName(e.target.value)}
+                      style={{ flex: 1 }}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      disabled={!newCollectionName.trim() || creatingCollection}
+                      onClick={async () => {
+                        setCreatingCollection(true);
+                        try {
+                          const res = await createCollection({ name: newCollectionName.trim() });
+                          setCollections((prev) => [...prev, res.data]);
+                          setForm((prev) => ({ ...prev, collectionId: res.data.id }));
+                          setNewCollectionName('');
+                          setShowNewCollection(false);
+                        } catch (err) {
+                          setError(err.message || 'Failed to create collection');
+                        } finally {
+                          setCreatingCollection(false);
+                        }
+                      }}
+                    >{creatingCollection ? 'Creating…' : 'Create'}</button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => { setShowNewCollection(false); setNewCollectionName(''); }}
+                    >Cancel</button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -445,13 +495,22 @@ export default function MockForm() {
                     <select
                       id="authType"
                       value={authConfig.type}
-                      onChange={(e) => setAuthConfig((prev) => ({ ...prev, type: e.target.value }))}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'OAUTH2' && !isPro) return;
+                        setAuthConfig((prev) => ({ ...prev, type: val }));
+                      }}
                     >
                       <option value="NONE">None</option>
                       <option value="BASIC">Basic Auth</option>
                       <option value="JWT">JWT Bearer</option>
-                      <option value="OAUTH2">OAuth2</option>
+                      <option value="OAUTH2" disabled={!isPro}>OAuth2{!isPro ? ' (PRO)' : ''}</option>
                     </select>
+                    {!isPro && (
+                      <span className="form-hint" style={{ color: 'var(--accent)' }}>
+                        OAuth2 is available on the PRO plan.
+                      </span>
+                    )}
                   </div>
 
                   {/* BASIC fields */}
@@ -577,8 +636,8 @@ export default function MockForm() {
               </div>
             )}
 
-            {/* Scenarios (PRO) */}
-            {isPro && isEdit && (
+            {/* Scenarios */}
+            {isAuthenticated && (
               <div className="form-group full-width">
                 <ScenarioBuilder
                   scenarios={scenarios}
@@ -586,24 +645,17 @@ export default function MockForm() {
                   onUpdate={handleUpdateScenario}
                   onDelete={handleDeleteScenario}
                   saving={saving}
+                  maxScenarios={isPro ? null : 2}
                 />
               </div>
             )}
-            {isPro && !isEdit && (
-              <div className="form-group full-width">
-                <p className="text-muted" style={{ fontSize: 12 }}>
-                  Save the mock first, then add scenarios with conditions.
-                </p>
-              </div>
-            )}
-            {!isPro && (
+            {!isAuthenticated && (
               <div className="form-group full-width">
                 <label>
                   Scenarios{' '}
-                  <span className="plan-badge plan-pro" style={{ marginLeft: 8, fontSize: 10 }}>PRO</span>
                 </label>
                 <p className="text-muted" style={{ fontSize: 12 }}>
-                  Upgrade to PRO to use rule-based scenarios with conditions.
+                  Log in to use rule-based scenarios with conditions.
                 </p>
               </div>
             )}

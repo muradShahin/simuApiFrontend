@@ -63,8 +63,9 @@ const ERROR_TEMPLATES = [
   { label: '503 Unavailable',  statusCode: 503, responseBody: '{"error":"Service Unavailable","message":"Service temporarily unavailable"}' },
 ];
 
-export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, saving }) {
+export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, saving, maxScenarios }) {
   const [expanded, setExpanded] = useState(null);
+  const atLimit = maxScenarios != null && scenarios.length >= maxScenarios;
 
   function toggleExpand(id) {
     setExpanded((prev) => (prev === id ? null : id));
@@ -140,15 +141,22 @@ export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, 
   return (
     <div className="scenario-builder">
       <div className="scenario-header">
-        <h3>Scenarios</h3>
+        <h3>
+          Scenarios
+          {maxScenarios != null && (
+            <span className="text-muted" style={{ fontSize: 12, fontWeight: 400, marginLeft: 8 }}>
+              ({scenarios.length}/{maxScenarios})
+            </span>
+          )}
+        </h3>
         <div className="scenario-header-actions">
           <div className="template-dropdown">
-            <button type="button" className="btn btn-ghost btn-sm template-trigger">
+            <button type="button" className="btn btn-ghost btn-sm template-trigger" disabled={atLimit}>
               Quick Add ▾
             </button>
             <div className="template-menu">
               {ERROR_TEMPLATES.map((t) => (
-                <button key={t.label} type="button" className="template-item" onClick={() => applyTemplate(t)}>
+                <button key={t.label} type="button" className="template-item" onClick={() => applyTemplate(t)} disabled={atLimit}>
                   {t.label}
                 </button>
               ))}
@@ -157,12 +165,19 @@ export default function ScenarioBuilder({ scenarios, onAdd, onUpdate, onDelete, 
           <button
             type="button"
             className="btn btn-primary btn-sm"
+            disabled={atLimit}
             onClick={() => onAdd({ name: '', description: '', priority: 0, statusCode: 200, responseBody: '', responseHeaders: '', delayMs: 0, conditions: [] })}
           >
             + Add Scenario
           </button>
         </div>
       </div>
+
+      {atLimit && (
+        <div className="alert alert-info" style={{ marginBottom: 8 }}>
+          Scenario limit reached ({maxScenarios} per mock). Upgrade to PRO to unlock unlimited scenarios.
+        </div>
+      )}
 
       {scenarios.length === 0 && (
         <div className="empty-state" style={{ padding: '32px 16px' }}>
