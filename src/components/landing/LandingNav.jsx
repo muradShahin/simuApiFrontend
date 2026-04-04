@@ -22,6 +22,9 @@ export default function LandingNav() {
              onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }}>
             How It Works
           </a>
+          <Link to="/docs" className="hover:text-text-primary transition-colors">
+            Docs
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">

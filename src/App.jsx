@@ -17,18 +17,21 @@ import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import LandingPage from './pages/LandingPage';
 import PublicMockPage from './pages/PublicMockPage';
+import DocsPage from './pages/DocsPage';
 
 function AppRoutes() {
   const location = useLocation();
   const isLandingPage = location.pathname === '/landing';
   const isPublicMock = location.pathname.startsWith('/public/mock/');
+  const isDocsPage = location.pathname === '/docs';
+  const isFullPage = isLandingPage || isPublicMock || isDocsPage;
   const isMinimalNav = ['/terms', '/pricing', '/privacy'].includes(location.pathname);
 
   return (
     <div className="app">
-      {!isLandingPage && !isPublicMock && <Navbar minimal={isMinimalNav} />}
-      <div className={isLandingPage || isPublicMock ? '' : 'app-body'}>
-        <main className={isLandingPage || isPublicMock ? '' : 'main-content'}>
+      {!isFullPage && <Navbar minimal={isMinimalNav} />}
+      <div className={isFullPage ? '' : 'app-body'}>
+        <main className={isFullPage ? '' : 'main-content'}>
           <Routes>
             <Route path="/" element={<Navigate to="/landing" replace />} />
             <Route path="/landing" element={<LandingPage />} />
@@ -47,6 +50,7 @@ function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/public/mock/:publicId" element={<PublicMockPage />} />
+            <Route path="/docs" element={<DocsPage />} />
           </Routes>
         </main>
       </div>
