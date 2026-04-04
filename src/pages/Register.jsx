@@ -15,8 +15,22 @@ export default function Register() {
   const [error, setError]       = useState(null);
   const [saving, setSaving]     = useState(false);
 
+  const passwordRules = [
+    { test: (p) => p.length >= 8, label: 'At least 8 characters' },
+    { test: (p) => /[A-Z]/.test(p), label: 'One uppercase letter' },
+    { test: (p) => /[a-z]/.test(p), label: 'One lowercase letter' },
+    { test: (p) => /[0-9]/.test(p), label: 'One number' },
+    { test: (p) => /[^A-Za-z0-9]/.test(p), label: 'One special character (!@#$…)' },
+  ];
+
+  const allRulesPassed = passwordRules.every((r) => r.test(password));
+
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!allRulesPassed) {
+      setError('Password does not meet the requirements');
+      return;
+    }
     if (password !== confirm) {
       setError('Passwords do not match');
       return;
@@ -65,10 +79,23 @@ export default function Register() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min 6 characters"
+              placeholder="Strong password"
               required
-              minLength={6}
+              minLength={8}
             />
+            {password.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {passwordRules.map((rule, i) => {
+                  const passed = rule.test(password);
+                  return (
+                    <li key={i} style={{ fontSize: 13, color: passed ? '#16a34a' : 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 16, textAlign: 'center' }}>{passed ? '✓' : '○'}</span>
+                      {rule.label}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
           <div className="form-group">
             <label htmlFor="confirm">Confirm Password</label>
@@ -79,10 +106,10 @@ export default function Register() {
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Repeat password"
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving || !allRulesPassed}>
             {saving ? 'Creating account…' : 'Create Account'}
           </button>
         </form>
