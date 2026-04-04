@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
       const data = res.data;
       client.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setToken(data.token);
-      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, slug: data.slug };
+      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, slug: data.slug, emailVerified: data.emailVerified };
       setUser(u);
       localStorage.setItem(USER_KEY, JSON.stringify(u));
       return u;
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
       const data = res.data;
       client.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setToken(data.token);
-      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, slug: data.slug };
+      const u = { id: data.userId, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, slug: data.slug, emailVerified: data.emailVerified };
       setUser(u);
       localStorage.setItem(USER_KEY, JSON.stringify(u));
       return u;
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await client.get('/auth/me');
       const data = res.data;
-      const u = { id: data.id, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, subscriptionExpiry: data.subscriptionExpiry, slug: data.slug };
+      const u = { id: data.id, email: data.email, role: data.role, plan: data.subscriptionPlan, subscriptionStatus: data.subscriptionStatus, subscriptionExpiry: data.subscriptionExpiry, slug: data.slug, emailVerified: data.emailVerified };
       setUser(u);
       localStorage.setItem(USER_KEY, JSON.stringify(u));
       return u;
@@ -113,8 +113,10 @@ export function AuthProvider({ children }) {
   const isPastDue = user?.subscriptionStatus === 'PAST_DUE';
   const isExpired = user?.plan === 'PRO' && user?.subscriptionStatus === 'INACTIVE';
 
+  const isVerified = user?.emailVerified === true;
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, isPro, isPastDue, isExpired, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, isPro, isPastDue, isExpired, isVerified, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -10,8 +10,10 @@ import {
   getTeamInvitations,
 } from '../api/teams';
 
+import VerificationBanner from '../components/VerificationBanner';
+
 export default function Teams() {
-  const { isAuthenticated, isPro } = useAuth();
+  const { isAuthenticated, isPro, isVerified } = useAuth();
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -153,6 +155,8 @@ export default function Teams() {
           Teams are a <span className="plan-badge plan-pro" style={{ fontSize: 10 }}>PRO</span> feature. Upgrade to create and manage teams.
         </div>
       )}
+
+      {isAuthenticated && !isVerified && <VerificationBanner />}
 
       {error && <div className="alert alert-error">{error}</div>}
 

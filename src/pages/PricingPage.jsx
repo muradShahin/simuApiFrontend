@@ -148,11 +148,12 @@ function FaqSection() {
    ═══════════════════════════════════════════════════════════════════ */
 export default function PricingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, isPro } = useAuth();
+  const { isAuthenticated, isPro, isVerified } = useAuth();
   const [upgrading, setUpgrading] = useState(false);
 
   async function handleUpgrade() {
     if (!isAuthenticated) { navigate('/register'); return; }
+    if (!isVerified) { alert('Please verify your email before upgrading to PRO.'); return; }
     setUpgrading(true);
     try {
       await openPaddleCheckout();

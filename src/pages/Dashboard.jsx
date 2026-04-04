@@ -18,6 +18,7 @@ import CollectionModal from '../components/CollectionModal';
 import MoveMockModal from '../components/MoveMockModal';
 import ConfirmModal from '../components/ConfirmModal';
 import ShareMockModal from '../components/ShareMockModal';
+import VerificationBanner from '../components/VerificationBanner';
 
 const BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 
@@ -29,7 +30,7 @@ export default function Dashboard() {
   const [upgrading, setUpgrading] = useState(false);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAuthenticated, isPro, isPastDue, isExpired, user, refreshUser } = useAuth();
+  const { isAuthenticated, isPro, isPastDue, isExpired, isVerified, user, refreshUser } = useAuth();
 
   const [collections, setCollections]       = useState([]);
   const [activeCollectionId, setActiveCollectionId] = useState(null);
@@ -264,6 +265,8 @@ export default function Dashboard() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {isAuthenticated && !isVerified && <VerificationBanner />}
+
       {/* Dashboard Stats */}
       {!loading && (
         <div className="dashboard-stats">
@@ -370,8 +373,11 @@ export default function Dashboard() {
                       {isAuthenticated && (
                         <button
                           className={`action-btn ${mock.publicShared ? 'action-shared' : 'action-share'}`}
-                          onClick={() => setSharingMock(mock)}
-                          title={mock.publicShared ? 'Manage sharing' : 'Share mock'}
+                          onClick={() => {
+                            if (!isVerified) { alert('Please verify your email before sharing mocks.'); return; }
+                            setSharingMock(mock);
+                          }}
+                          title={!isVerified ? 'Verify email to share' : mock.publicShared ? 'Manage sharing' : 'Share mock'}
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                           {mock.publicShared ? 'Shared' : 'Share'}
