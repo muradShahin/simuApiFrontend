@@ -6,9 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-text-primary">
-              Mock<span className="text-brand-light">Craft</span>
-            </span>
+            <img src="/logo.png" alt="MockCraft" style={{ width: '160px', height: '44px', objectFit: 'cover', objectPosition: 'center' }} />
           </div>
 
           <div className="flex items-center gap-6 text-sm">

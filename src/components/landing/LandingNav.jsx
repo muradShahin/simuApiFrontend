@@ -5,8 +5,8 @@ export default function LandingNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-surface-0/80 backdrop-blur-lg border-b border-border">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-text-primary">
-          Mock<span className="text-brand-light">Craft</span>
+        <Link to="/" className="flex items-center">
+          <img src="/logo.png" alt="MockCraft" style={{ width: '160px', height: '44px', objectFit: 'cover', objectPosition: 'center' }} />
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-text-muted">

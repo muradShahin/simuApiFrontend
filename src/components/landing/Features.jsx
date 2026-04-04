@@ -34,6 +34,11 @@ const features = [
     title: 'Export APIs',
     description: 'Export your mock definitions as OpenAPI specs or Postman collections. Share with your team.',
   },
+  {
+    emoji: '🔗',
+    title: 'Public Sharing',
+    description: 'Share any mock endpoint publicly with a single link. Viewers can explore docs, test the API, and export — no sign-up required.',
+  },
 ];
 
 export default function Features() {

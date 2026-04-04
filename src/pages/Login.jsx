@@ -32,7 +32,7 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <span className="auth-logo-text">Mock<span>Craft</span></span>
+          <img src="/logo.png" alt="MockCraft" className="auth-logo-img" />
         </div>
         <h1 className="auth-title">Sign In</h1>
         <p className="auth-subtitle">Welcome back to MockCraft</p>

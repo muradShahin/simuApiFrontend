@@ -37,7 +37,7 @@ export default function Navbar({ minimal }) {
   return (
     <nav className="navbar">
       <NavLink to="/dashboard" className="navbar-brand">
-        Mock<span>Craft</span>
+        <img src="/logo.png" alt="MockCraft" className="navbar-logo" />
       </NavLink>
       {!isAuthPage && !minimal && (
         <div className="navbar-links">

@@ -7,6 +7,7 @@ import { getAuthConfig } from '../api/authConfig';
 import { getLogsByEndpoint } from '../api/logs';
 import { useAuth } from '../context/AuthContext';
 import ExportDropdown from '../components/ExportDropdown';
+import ShareMockModal from '../components/ShareMockModal';
 import { exportMockPostman, exportMockOpenApi } from '../api/export';
 import OverviewTab from '../components/mockdetail/OverviewTab';
 import ScenariosTab from '../components/mockdetail/ScenariosTab';
@@ -38,6 +39,7 @@ export default function MockDetailPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const loadLogs = useCallback(async () => {
     try {
@@ -99,6 +101,11 @@ export default function MockDetailPage() {
             />
           )}
           {isAuthenticated && (
+            <button className="btn btn-ghost btn-sm" onClick={() => setShowShareModal(true)}>
+              🔗 Share
+            </button>
+          )}
+          {isAuthenticated && (
             <button className="btn btn-primary btn-sm" onClick={() => navigate(`/mocks/${id}/edit`)}>
               Edit Mock
             </button>
@@ -126,6 +133,16 @@ export default function MockDetailPage() {
         {activeTab === 'try-it'    && <TryItTab mock={mock} slug={user?.slug} />}
         {activeTab === 'logs'      && <MockLogsTab logs={logs} onRefresh={loadLogs} />}
       </div>
+
+      {showShareModal && (
+        <ShareMockModal
+          mock={mock}
+          onClose={() => setShowShareModal(false)}
+          onUpdated={() => {
+            getMockById(id).then(res => setMock(res.data));
+          }}
+        />
+      )}
     </div>
   );
 }
